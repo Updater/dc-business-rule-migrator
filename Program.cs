@@ -18,6 +18,7 @@ namespace BusinessRulesMigrator
         
         static void Main(string[] args)
         {
+            
             try
             {
                 using (var reader = new StreamReader(@"C:\BusinessRules\OldRules.csv"))
@@ -26,6 +27,7 @@ namespace BusinessRulesMigrator
                     csv.Context.TypeConverterCache.AddConverter<int?>(new NullableInt32Converter());
                     csv.Context.TypeConverterCache.AddConverter<string>(new NullableStringConverter());
                     var rules = csv.GetRecords<OldBusinessRule>();
+                    Console.WriteLine("Converting...");
 
                     var converted = new RevenueRankingRuleConverter().ConvertRules(rules);
 
@@ -41,7 +43,7 @@ namespace BusinessRulesMigrator
                 Console.WriteLine($"ERROR: {ex.ToString()}");
             }
 
-            Console.WriteLine("Press any key to exit");
+            Console.WriteLine("Press enter to exit");
             Console.ReadLine();
         }
 

@@ -31,7 +31,7 @@ namespace BusinessRulesMigrator
             };
         }
 
-        public static string GenerateRuleSql(DriverKey key, RuleType ruleType, int MessageTypeId, string data)
+        public static string GenerateRuleSql(DriverKey key, RuleType ruleType, int MessageTypeId, object data)
         {
             if (key is null) throw new ArgumentNullException("rule");
 
@@ -69,7 +69,7 @@ namespace BusinessRulesMigrator
                         $"{key.DisplayCategoryID.ToSqlValue()}," +
                         "NULL," + //null for now
                         "NULL," + //null for now
-                        $"'{data}'," +
+                        $"'{JsonSerializer.Serialize(data, new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull })}'," +
                         $"NULL," + //null for now
                         "GETDATE()," +
                         "NULL," +
