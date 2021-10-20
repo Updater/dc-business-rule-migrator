@@ -56,20 +56,20 @@ namespace BusinessRulesMigrator.RevenueRanking
                         new Item
                         {
                             RevenueRanking = revenueRanking,
-                            Offers = new OffersSpec { ByProvider = new ByProvider { Condition = "IfAny", IDs = new List<int> { rule.ProviderID.Value } } }
+                            Offers = new OffersSpec()
                         }
                     };
 
                     newRules.Add(key, items);
                 }
 
-                var item = items.FirstOrDefault(i => string.Equals(i.RevenueRanking, revenueRanking) && i.Offers.ByProvider.IDs.Contains(rule.ProviderID.Value));
+                var item = items.FirstOrDefault(i => string.Equals(i.RevenueRanking, revenueRanking));
                 if (item is null)
                 {
                     item = new Item
                     {
                         RevenueRanking = revenueRanking,
-                        Offers = new OffersSpec { ByProvider = new ByProvider { Condition = "IfAny", IDs = new List<int> { rule.ProviderID.Value } } }
+                        Offers = new OffersSpec()
                     };
 
                     items.Add(item);
