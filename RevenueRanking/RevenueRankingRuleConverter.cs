@@ -149,7 +149,7 @@ namespace BusinessRulesMigrator.RevenueRanking
 
             foreach (var pair in newRules)
             {
-                var sql = Helpers.GenerateRuleSql(pair.Key, RuleType.OverrideOfferRevenueRanking, 1, JsonSerializer.Serialize(pair.Value));
+                var sql = Helpers.GenerateRuleSql(pair.Key, RuleType.OverrideOfferRevenueRanking, 1, pair.Value);
 
                 if (!string.IsNullOrEmpty(sql))
                 {
