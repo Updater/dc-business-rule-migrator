@@ -65,9 +65,11 @@ namespace BusinessRulesMigrator.RevenueRanking
                         RevenueRanking = revenueRanking,
                         Offers = new OffersSpec()
                     };
+
+                    items.Add(item);
                 }
 
-                items.Add(item);
+                
 
                 // By offer code
                 if (!string.IsNullOrEmpty(rule.OfferCode) && !string.Equals(rule.OfferCode, "NULL", StringComparison.OrdinalIgnoreCase))
