@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Text.Json;
 
 namespace BusinessRulesMigrator.Common
 {
@@ -8,7 +9,8 @@ namespace BusinessRulesMigrator.Common
     {
         public OffersSpec() { }
 
-        public int? ProviderId;
+        
+        public int? ProviderId { get; set; }
         public ByCode ByCode { get; set; }
         public ByProducts ByProducts { get; set; }
     }
