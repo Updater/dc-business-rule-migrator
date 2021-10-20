@@ -9,16 +9,15 @@ using CsvHelper;
 using BusinessRulesMigrator.Common.CsvHelper;
 using BusinessRulesMigrator.Common.Extensions;
 using BusinessRulesMigrator.RevenueRanking;
+using BusinessRulesMigrator.OverrideOrderConfirmation;
 using System.Threading.Tasks;
 
 namespace BusinessRulesMigrator
 {
     class Program
-    {
-        
+    {   
         static void Main(string[] args)
         {
-            
             try
             {
                 using (var reader = new StreamReader(@"C:\BusinessRules\OldRules.csv"))
@@ -27,26 +26,28 @@ namespace BusinessRulesMigrator
                     csv.Context.TypeConverterCache.AddConverter<int?>(new NullableInt32Converter());
                     csv.Context.TypeConverterCache.AddConverter<string>(new NullableStringConverter());
                     var rules = csv.GetRecords<OldBusinessRule>();
-                    Console.WriteLine("Converting...");
 
-                    var converted = new RevenueRankingRuleConverter().ConvertRules(rules);
+                    var revenueRankingRules = new RevenueRankingRuleConverter().ConvertRules(rules);
+                    var overrideOrderConfirmationRules = new OverrideOrderConfirmationConverter().Convert(rules);
 
-                    if (converted is not null && converted.Any())
+                    var newRules =
+                        revenueRankingRules
+                        .Concat(overrideOrderConfirmationRules);
+
+                    if (newRules.Any())
                     {
-                        File.WriteAllLines(@"C:\BusinessRules\ConvertedRules.txt", converted);
+                        File.WriteAllLines(@"C:\BusinessRules\ConvertedRules.txt", newRules);
                         Console.WriteLine("Success!");
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ERROR: {ex.ToString()}");
+                Console.WriteLine($"ERROR: {ex}");
             }
 
-            Console.WriteLine("Press enter to exit");
+            Console.WriteLine("Press any key to exit");
             Console.ReadLine();
         }
-
-        
     }
 }

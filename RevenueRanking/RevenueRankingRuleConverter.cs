@@ -36,7 +36,7 @@ namespace BusinessRulesMigrator.RevenueRanking
                 }
                 
                 var revenueRanking = GetRevenueRankingString(rr);
-                var key = Helpers.GetKey(rule);
+                var key = rule.GetDriverKey();
                 List<Item> items = null;
                 bool isNew = true;
 
@@ -144,23 +144,20 @@ namespace BusinessRulesMigrator.RevenueRanking
                 {
                     newRules.Add(key, items);
                 }
-                
             }
 
-            foreach (var pair in newRules)
-            {
-                var sql = Helpers.GenerateRuleSql(pair.Key, RuleType.OverrideOfferRevenueRanking, 1, pair.Value);
+            //foreach (var pair in newRules)
+            //{
+            //    var sql = Helpers.GenerateRuleSql(pair.Key, RuleType.OverrideOfferRevenueRanking, 1, pair.Value);
 
-                if (!string.IsNullOrEmpty(sql))
-                {
-                    converted.Add(sql);
-                }
-            }
+            //    if (!string.IsNullOrEmpty(sql))
+            //    {
+            //        converted.Add(sql);
+            //    }
+            //}
 
             return converted;
         }
-
-        
 
         private string GetRevenueRankingString(int revenueRanking)
         {

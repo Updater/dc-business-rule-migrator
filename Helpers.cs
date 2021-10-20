@@ -1,40 +1,20 @@
 ﻿using System;
 using System.Text.Json;
 using System.Collections.Generic;
-using BusinessRulesMigrator.Common;
 using System.IO;
 using System.Globalization;
 using System.Linq;
-using CsvHelper;
-using BusinessRulesMigrator.Common.CsvHelper;
+using BusinessRulesMigrator.Common;
 using BusinessRulesMigrator.Common.Extensions;
-using BusinessRulesMigrator.RevenueRanking;
+
+using Bridgevine.Json;
 
 namespace BusinessRulesMigrator
 {
     internal static class Helpers
     {
-        public static DriverKey GetKey(OldBusinessRule rule)
+        public static string GenerateRuleSql(RuleType ruleType, int messageType, int providerId, DriverKey driver, object data)
         {
-            return new DriverKey
-            {
-                SourcePlatformID = rule.SourcePlatformID,
-                PromoID = rule.PromoID,
-                UIReferenceDataID = rule.UIReferenceDataID,
-                OriginatorID = rule.OriginatorID,
-                BrokerID = rule.BrokerID,
-                ProviderID = rule.ProviderID,
-                DisplayCategoryID = rule.DisplayCategoryID,
-                PostalCodeGroupID = rule.PostalCodeGroupID,
-                CampaignTypeId = rule.CampaignTypeId,
-                BundledOfferTypeIDs = rule.BundledOfferTypeIDs
-            };
-        }
-
-        public static string GenerateRuleSql(DriverKey key, RuleType ruleType, int MessageTypeId, object data)
-        {
-            if (key is null) throw new ArgumentNullException("rule");
-
             return "INSERT INTO BusinessRule " +
                     "(" +
                         "BusinessRuleTypeId," +
@@ -48,34 +28,22 @@ namespace BusinessRulesMigrator
                         "DisplayCategoryId," +
                         "StateGroupId," +
                         "ZipCodeGroupId," +
-                        "Data," +
-                        "Condition," +
-                        "ValidFrom," +
-                        "ValidTo," +
-                        "Active," +
-                        "CreateDate," +
-                        "CreatedBy" +
+                        "Data" +
                     ")" +
                     "VALUES" +
                     "(" +
                         $"{(int)ruleType}," +
-                        $"{MessageTypeId}," +
-                        $"{key.ProviderID.ToSqlValue()}," +
-                        $"{key.PromoID.ToSqlValue()}," +
-                        $"{key.CampaignTypeId.ToSqlValue()}," +
-                        $"{key.SourcePlatformID.ToSqlValue()}," +
-                        $"{key.UIReferenceDataID.ToSqlValue()}," +
-                        $"{key.OriginatorID.ToSqlValue()}," +
-                        $"{key.DisplayCategoryID.ToSqlValue()}," +
-                        "NULL," + //null for now
-                        "NULL," + //null for now
-                        $"'{JsonSerializer.Serialize(data, new JsonSerializerOptions { DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull })}'," +
-                        $"NULL," + //null for now
-                        "GETDATE()," +
-                        "NULL," +
-                        "1," +
-                        "GETDATE()," +
-                        "SUSER_SNAME()" +
+                        $"{messageType}," +
+                        $"{providerId}," +
+                        $"{driver.PromoId.ToSqlValue()}," +
+                        $"{driver.CampaignTypeId.ToSqlValue()}," +
+                        $"{driver.SourcePlatformId.ToSqlValue()}," +
+                        $"{driver.UIReferenceDataId.ToSqlValue()}," +
+                        $"{driver.OriginatorId.ToSqlValue()}," +
+                        $"{driver.DisplayCategoryId.ToSqlValue()}," +
+                        "NULL," + 
+                        "NULL," + 
+                        $"'{BvJson.Serialize(data)}'" +
                     ")";
         }
     }
