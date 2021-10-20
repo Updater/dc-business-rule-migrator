@@ -7,10 +7,12 @@ namespace BusinessRulesMigrator.Common
 {
     internal class OffersSpec
     {
-        public OffersSpec() { }
+        public OffersSpec() 
+        {
 
-        
-        public int? ProviderId { get; set; }
+        }
+  
+        public ByProvider ByProvider { get; set; }
         public ByCode ByCode { get; set; }
         public ByProducts ByProducts { get; set; }
     }

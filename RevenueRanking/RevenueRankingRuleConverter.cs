@@ -18,6 +18,12 @@ namespace BusinessRulesMigrator.RevenueRanking
 
             foreach (var rule in rules)
             {
+                //ProviderID required for this rule
+                if (!rule.ProviderID.HasValue)
+                {
+                    continue;
+                }
+
                 int rr;
                 if (!int.TryParse(rule.value, out rr))
                 {
@@ -38,11 +44,9 @@ namespace BusinessRulesMigrator.RevenueRanking
                 var revenueRanking = GetRevenueRankingString(rr);
                 var key = Helpers.GetKey(rule);
                 List<Item> items = null;
-                bool isNew = true;
 
                 if (newRules.ContainsKey(key))
                 {
-                    isNew = false;
                     items = newRules[key];
                 }
                 else
@@ -52,25 +56,25 @@ namespace BusinessRulesMigrator.RevenueRanking
                         new Item
                         {
                             RevenueRanking = revenueRanking,
-                            Offers = new OffersSpec()
+                            Offers = new OffersSpec { ByProvider = new ByProvider { Condition = "IfAny", IDs = new List<int> { rule.ProviderID.Value } } }
                         }
                     };
+
+                    newRules.Add(key, items);
                 }
 
-                var item = items.FirstOrDefault(i => string.Equals(i.RevenueRanking, revenueRanking));
+                var item = items.FirstOrDefault(i => string.Equals(i.RevenueRanking, revenueRanking) && i.Offers.ByProvider.IDs.Contains(rule.ProviderID.Value));
                 if (item is null)
                 {
                     item = new Item
                     {
                         RevenueRanking = revenueRanking,
-                        Offers = new OffersSpec()
+                        Offers = new OffersSpec { ByProvider = new ByProvider { Condition = "IfAny", IDs = new List<int> { rule.ProviderID.Value } } }
                     };
 
                     items.Add(item);
                 }
-
                 
-
                 // By offer code
                 if (!string.IsNullOrEmpty(rule.OfferCode) && !string.Equals(rule.OfferCode, "NULL", StringComparison.OrdinalIgnoreCase))
                 {
@@ -138,13 +142,7 @@ namespace BusinessRulesMigrator.RevenueRanking
                                 }
                             }
                         });
-                }
-
-                if (isNew)
-                {
-                    newRules.Add(key, items);
-                }
-                
+                }                
             }
 
             foreach (var pair in newRules)
