@@ -9,6 +9,7 @@ using CsvHelper;
 using BusinessRulesMigrator.Common.CsvHelper;
 using BusinessRulesMigrator.Common.Extensions;
 using BusinessRulesMigrator.RevenueRanking;
+using BusinessRulesMigrator.Common.Offers;
 
 namespace BusinessRulesMigrator
 {
@@ -77,6 +78,78 @@ namespace BusinessRulesMigrator
                         "GETDATE()," +
                         "SUSER_SNAME()" +
                     ")";
+        }
+
+        public static void PopulateOfferSpecByCodeByProvider(OldBusinessRule rule, OffersSpec spec)
+        {
+            // By offer code
+            if (!string.IsNullOrEmpty(rule.OfferCode) && !string.Equals(rule.OfferCode, "NULL", StringComparison.OrdinalIgnoreCase))
+            {
+                if (spec.ByCode is null)
+                {
+                    spec.ByCode = new ByCode
+                    {
+                        Condition = "IfAny",
+                        Codes = new List<string>()
+                    };
+                }
+
+                if (!spec.ByCode.Codes.Contains(rule.OfferCode))
+                {
+                    spec.ByCode.Codes.Add(rule.OfferCode);
+                }
+            }
+
+            // By Offer Category
+            if (rule.OfferTypeID.HasValue && Offer.OfferCategories.ContainsKey(rule.OfferTypeID.Value))
+            {
+                if (spec.ByProducts is null)
+                {
+                    spec.ByProducts = new ByProducts
+                    {
+                        Condition = "IfAny",
+                        Specs = new List<ProductSpec>()
+                    };
+                }
+
+                spec.ByProducts.Specs.Add(
+                    new ProductSpec
+                    {
+                        Condition = "HasExactly",
+                        Products = new List<Product>{
+                                new Product
+                                {
+                                    Category = Offer.OfferCategories[rule.OfferTypeID.Value]
+                                }
+                        }
+                    });
+            }
+
+            // By Offer Type
+            if (rule.OfferSubTypeID.HasValue && Offer.OfferTypes.ContainsKey(rule.OfferSubTypeID.Value))
+            {
+                if (spec.ByProducts is null)
+                {
+                    spec.ByProducts = new ByProducts
+                    {
+                        Condition = "IfAny",
+                        Specs = new List<ProductSpec>()
+                    };
+                }
+                var type = Offer.OfferTypes[rule.OfferSubTypeID.Value];
+                spec.ByProducts.Specs.Add(
+                    new ProductSpec
+                    {
+                        Condition = "HasExactly",
+                        Products = new List<Product>{
+                                new Product
+                                {
+                                    Category = Offer.GetOfferCategoryForOfferType(type.Category),
+                                    Type = type.Type
+                                }
+                        }
+                    });
+            }
         }
     }
 }

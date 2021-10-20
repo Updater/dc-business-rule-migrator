@@ -74,75 +74,8 @@ namespace BusinessRulesMigrator.RevenueRanking
 
                     items.Add(item);
                 }
-                
-                // By offer code
-                if (!string.IsNullOrEmpty(rule.OfferCode) && !string.Equals(rule.OfferCode, "NULL", StringComparison.OrdinalIgnoreCase))
-                {
-                    if (item.Offers.ByCode is null)
-                    {
-                        item.Offers.ByCode = new ByCode
-                        {
-                            Condition = "IfAny",
-                            Codes = new List<string>()
-                        };
-                    }
 
-                    if (!item.Offers.ByCode.Codes.Contains(rule.OfferCode))
-                    {
-                        item.Offers.ByCode.Codes.Add(rule.OfferCode);
-                    }
-                }
-
-                // By Offer Category
-                if (rule.OfferTypeID.HasValue && Offer.OfferCategories.ContainsKey(rule.OfferTypeID.Value))
-                {
-                    if (item.Offers.ByProducts is null)
-                    {
-                        item.Offers.ByProducts = new ByProducts
-                        {
-                            Condition = "IfAny",
-                            Specs = new List<ProductSpec>()
-                        };
-                    }
-
-                    item.Offers.ByProducts.Specs.Add(
-                        new ProductSpec
-                        {
-                            Condition = "HasExactly",
-                            Products = new List<Product>{ 
-                                new Product 
-                                { 
-                                    Category = Offer.OfferCategories[rule.OfferTypeID.Value] 
-                                } 
-                            }
-                        });
-                }
-
-                // By Offer Type
-                if (rule.OfferSubTypeID.HasValue && Offer.OfferTypes.ContainsKey(rule.OfferSubTypeID.Value))
-                {
-                    if (item.Offers.ByProducts is null)
-                    {
-                        item.Offers.ByProducts = new ByProducts
-                        {
-                            Condition = "IfAny",
-                            Specs = new List<ProductSpec>()
-                        };
-                    }
-                    var type = Offer.OfferTypes[rule.OfferSubTypeID.Value];
-                    item.Offers.ByProducts.Specs.Add(
-                        new ProductSpec
-                        {
-                            Condition = "HasExactly",
-                            Products = new List<Product>{
-                                new Product
-                                {
-                                    Category = Offer.GetOfferCategoryForOfferType(type.Category),
-                                    Type = type.Type
-                                }
-                            }
-                        });
-                }                
+                Helpers.PopulateOfferSpecByCodeByProvider(rule, item.Offers);           
             }
 
             foreach (var pair in newRules)
