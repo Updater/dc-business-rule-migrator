@@ -54,7 +54,7 @@ namespace BusinessRulesMigrator
                         "ValidTo," +
                         "Active," +
                         "CreateDate," +
-                        "CreatedBy," +
+                        "CreatedBy" +
                     ")" +
                     "VALUES" +
                     "(" +
