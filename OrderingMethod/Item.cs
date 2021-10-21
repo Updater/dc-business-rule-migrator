@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using BusinessRulesMigrator.Common;
 
-namespace BusinessRulesMigrator.RevenueRanking
+namespace BusinessRulesMigrator.OrderingMethod
 {
     internal class Item
     {
-        public string RevenueRanking { get; set; }
+        public OrderingMethodData OrderingMethod { get; set; }
 
         public OffersSpec Offers { get; set; }
     }

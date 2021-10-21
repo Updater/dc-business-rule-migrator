@@ -9,6 +9,7 @@ using CsvHelper;
 using BusinessRulesMigrator.Common.CsvHelper;
 using BusinessRulesMigrator.Common.Extensions;
 using BusinessRulesMigrator.RevenueRanking;
+using BusinessRulesMigrator.OrderingMethod;
 using BusinessRulesMigrator.OverrideOrderConfirmation;
 using System.Threading.Tasks;
 
@@ -28,10 +29,12 @@ namespace BusinessRulesMigrator
                     var rules = csv.GetRecords<OldBusinessRule>().ToArray();
 
                     var revenueRankingRules = new RevenueRankingRuleConverter().Convert(rules);
+                    var orderingMethodRules = new OrderingMethodRuleConverter().Convert(rules);
                     var overrideOrderConfirmationRules = new OverrideOrderConfirmationConverter().Convert(rules);
 
                     var newRules =
                         revenueRankingRules
+                        .Concat(orderingMethodRules)
                         .Concat(overrideOrderConfirmationRules);
 
                     if (newRules.Any())

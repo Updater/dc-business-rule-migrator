@@ -19,6 +19,7 @@ namespace BusinessRulesMigrator.Common.Extensions
         static class EntityAttribute
         { 
             public const string RevenueRanking = "RevenueRanking";
+            public const string OrderingMethod = "OrderingMethod";
             public const string ProviderFollowUpMessage = "ProviderFollowUpMessage";
             public const string ProviderFollowUpMessageByResultCode = "ProviderFollowUpMessageByResultCode";
         }
@@ -27,6 +28,12 @@ namespace BusinessRulesMigrator.Common.Extensions
             rules
             .Where(r => r.ProviderID.HasValue)
             .Where(r => r.Entity.SameAs(Entity.Offer) && r.EntityAttribute.SameAs(EntityAttribute.RevenueRanking))
+            .ToArray();
+
+        public static OldBusinessRule[] OrderingMethodRules(this IEnumerable<OldBusinessRule> rules) =>
+            rules
+            .Where(r => r.ProviderID.HasValue)
+            .Where(r => r.Entity.SameAs(Entity.Offer) && r.EntityAttribute.SameAs(EntityAttribute.OrderingMethod))
             .ToArray();
 
         public static OldBusinessRule[] OverrideOrderConfirmationRules(this IEnumerable<OldBusinessRule> rules) =>

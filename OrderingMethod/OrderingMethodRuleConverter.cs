@@ -9,24 +9,15 @@ using BusinessRulesMigrator.Common.Extensions;
 using Bridgevine;
 using static BusinessRulesMigrator.Helpers;
 
-namespace BusinessRulesMigrator.RevenueRanking
+namespace BusinessRulesMigrator.OrderingMethod
 {
-    internal class RevenueRankingRuleConverter
+    internal class OrderingMethodRuleConverter
     {
-        private string GetRevenueRanking(int revenueRanking) => revenueRanking switch
-        {
-            2 => "Two",
-            3 => "Three",
-            4 => "Four",
-            5 => "Five",
-            _ => "One"
-        };
-
         public List<string> Convert(IEnumerable<OldBusinessRule> rules)
         {
             var converted = new List<string>();
 
-            var groups = rules.RevenueRankingRules().GroupBy(r => r.GetDriverKey());
+            var groups = rules.OrderingMethodRules().GroupBy(r => r.GetDriverKey());
 
             if (!groups.Any()) return converted;
 
@@ -44,29 +35,28 @@ namespace BusinessRulesMigrator.RevenueRanking
 
                 foreach (var rule in group.ToList())
                 {
-                    if (!int.TryParse(rule.value, out int value))
+                    var values = rule.value.GetList(false, @"[~]");
+
+                    if (!values.Any())
                     {
-                        Console.WriteLine($"ERROR: A non integer RevenueRanking value found. BusinessRuleID {rule.BusinessRuleID} Value: {rule.value}");
-                        continue;
-                    }
-                    else if (value == 0)
-                    {
-                        continue;
-                    }
-                    else if (value < 1 || value > 5)
-                    {
-                        Console.WriteLine($"ERROR: An out of bounds RevenueRanking value found. BusinessRuleID {rule.BusinessRuleID} Value: {rule.value}");
+                        Console.WriteLine($"ERROR: Invalid rule value in OrderingMethod rule. BusinessRuleID: {rule.BusinessRuleID} Value: {rule.value}");
                         continue;
                     }
 
-                    var revenueRanking = GetRevenueRanking(value);
+                    var orderingMethod = new OrderingMethodData 
+                    {
+                        Type = values[0],
+                        ImageUrl = values.Count > 1 ? values[1] : null,
+                        ExternalUrl = values.Count > 2 ? values[2] : null,
+                        Instructions = values.Count > 3 ? values[3] : null,
+                    };
 
-                    var item = data.FirstOrDefault(i => i.RevenueRanking.SameAs(revenueRanking));
+                    var item = data.FirstOrDefault(i => i.OrderingMethod.SameAs(orderingMethod));
                     if (item.IsNull())
                     {
                         item = new Item
                         {
-                            RevenueRanking = revenueRanking,
+                            OrderingMethod = orderingMethod,
                             Offers = new OffersSpec(),
                         };
                         data.Add(item);
@@ -81,7 +71,7 @@ namespace BusinessRulesMigrator.RevenueRanking
             foreach (var (driver, data) in dataByDriver)
             {
                 if (data.Any())
-                    converted.Add(GenerateRuleSql(RuleType.OverrideOfferRevenueRanking, Operation.GetOfferAvailability, driver, data));
+                    converted.Add(GenerateRuleSql(RuleType.OverrideOfferOrderingMethod, Operation.GetOfferAvailability, driver, data));
             }
 
             return converted;
