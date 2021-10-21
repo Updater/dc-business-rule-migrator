@@ -36,11 +36,14 @@ namespace BusinessRulesMigrator.Common.Extensions
             .Where(r => r.Entity.SameAs(Entity.Offer) && r.EntityAttribute.SameAs(EntityAttribute.OrderingMethod))
             .ToArray();
 
+        public static bool IsFollowUpMessage(this OldBusinessRule r) => r.EntityAttribute.SameAs(EntityAttribute.ProviderFollowUpMessage);
+
+        public static bool IsFollowUpMessageByResultCode(this OldBusinessRule r) => r.EntityAttribute.SameAs(EntityAttribute.ProviderFollowUpMessageByResultCode);
+
         public static OldBusinessRule[] OverrideOrderConfirmationRules(this IEnumerable<OldBusinessRule> rules) =>
             rules
-            .Where(r => r.ProviderID.HasValue)
             .Where(r => r.Entity.SameAs(Entity.OrderConfirmation))
-            .Where(r => r.EntityAttribute.SameAs(EntityAttribute.ProviderFollowUpMessage) || r.EntityAttribute.SameAs(EntityAttribute.ProviderFollowUpMessageByResultCode))
+            .Where(r => r.IsFollowUpMessage() || r.IsFollowUpMessageByResultCode())
             .ToArray();
 
         public static string ToSqlValue(this int? value) => value.HasValue ? value.Value.ToString() : "NULL";
