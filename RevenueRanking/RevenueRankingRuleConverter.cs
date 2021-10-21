@@ -28,11 +28,17 @@ namespace BusinessRulesMigrator.RevenueRanking
             {
                 var driver = group.Key;
 
+                if (!dataByDriver.TryGetValue(driver, out var data))
+                {
+                    data = new List<Item>();
+                    dataByDriver[driver] = data;
+                }
+
                 foreach (var rule in group.ToList())
                 {
                     if (!int.TryParse(rule.value, out int value))
                     {
-                        Console.WriteLine($"ERROR: an non integer RevenueRanking value found in BusinessRuleID {rule.BusinessRuleID}.  Value: {rule.value}");
+                        Console.WriteLine($"ERROR: an non integer RevenueRanking value found in BusinessRuleID {rule.BusinessRuleID}. Value: {rule.value}");
                         continue;
                     }
                     else if (value == 0)
@@ -42,14 +48,8 @@ namespace BusinessRulesMigrator.RevenueRanking
                     }
                     else if (value < 1 || value > 5)
                     {
-                        Console.WriteLine($"ERROR: an out of bounds RevenueRanking value found in BusinessRuleID {rule.BusinessRuleID}.  Value: {rule.value}");
+                        Console.WriteLine($"ERROR: an out of bounds RevenueRanking value found in BusinessRuleID {rule.BusinessRuleID}. Value: {rule.value}");
                         continue;
-                    }
-
-                    if (!dataByDriver.TryGetValue(driver, out var data))
-                    {
-                        data = new List<Item>();
-                        dataByDriver[driver] = data;
                     }
 
                     var revenueRanking = GetRevenueRanking(value);
@@ -138,7 +138,8 @@ namespace BusinessRulesMigrator.RevenueRanking
 
             foreach (var (driver, data) in dataByDriver)
             {
-                converted.Add(GenerateRuleSql(RuleType.OverrideOfferRevenueRanking, Operation.GetOfferAvailability, driver, data));
+                if (data.Any())
+                    converted.Add(GenerateRuleSql(RuleType.OverrideOfferRevenueRanking, Operation.GetOfferAvailability, driver, data));
             }
 
             return converted;
