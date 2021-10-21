@@ -16,6 +16,11 @@ namespace BusinessRulesMigrator.Common
      
         public ByProducts ByProducts { get; set; }
 
+        public bool HasConstraints() =>
+            (ByProvider?.IDs).Safe().Any() ||
+            (ByCode?.Codes).Safe().Any() ||
+            (ByProducts?.Specs).Safe().Any();
+
         public void AddOfferCode(string code)
         {
             if (code.IsBlank() || code.SameAs("NULL")) return;

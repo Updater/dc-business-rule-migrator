@@ -35,7 +35,8 @@ namespace BusinessRulesMigrator
                     var newRules =
                         revenueRankingRules
                         .Concat(orderingMethodRules)
-                        .Concat(overrideOrderConfirmationRules);
+                        .Concat(overrideOrderConfirmationRules)
+                        .ToArray();
 
                     if (newRules.Any())
                     {
