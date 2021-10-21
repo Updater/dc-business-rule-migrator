@@ -6,11 +6,8 @@ namespace BusinessRulesMigrator.Common
 {
     internal class Product
     {
-        public Product()
-        {
-
-        }
         public string Category { get; set; }
+
         public string Type { get; set; }
     }
 }

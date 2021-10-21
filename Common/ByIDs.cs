@@ -5,10 +5,10 @@ using System.Text.Json;
 
 namespace BusinessRulesMigrator.Common
 {
-    internal class ByCode
+    internal class ByIDs
     {
-        public ByCode() { }
         public string Condition { get; set; }
-        public List<string> Codes { get; set; }
+        
+        public List<string> IDs { get; set; }
     }
 }

@@ -6,8 +6,8 @@ namespace BusinessRulesMigrator.Common
 {
     internal class ProductSpec
     {
-        public ProductSpec() { }
         public string Condition { get; set; }
+
         public List<Product> Products { get; set; }
     }
 }

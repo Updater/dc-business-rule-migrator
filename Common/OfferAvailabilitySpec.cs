@@ -8,6 +8,8 @@ namespace BusinessRulesMigrator.Common
 {
     internal class OfferAvailabilitySpec
     {
+        public string Condition { get; set; }
 
+        public List<OffersSpec> Specs { get; set; }
     }
 }
