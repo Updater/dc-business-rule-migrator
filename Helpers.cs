@@ -13,38 +13,36 @@ namespace BusinessRulesMigrator
 {
     internal static class Helpers
     {
-        public static string GenerateRuleSql(RuleType ruleType, int messageType, int providerId, DriverKey driver, object data)
-        {
-            return "INSERT INTO BusinessRule " +
-                    "(" +
-                        "BusinessRuleTypeId," +
-                        "BrokerMessageId," +
-                        "ProviderId," +
-                        "PromoId," +
-                        "CampaignTypeId," +
-                        "SourcePlatformId," +
-                        "UIReferenceDataId," +
-                        "OriginatorId," +
-                        "DisplayCategoryId," +
-                        "StateGroupId," +
-                        "ZipCodeGroupId," +
-                        "Data" +
-                    ")" +
-                    "VALUES" +
-                    "(" +
-                        $"{(int)ruleType}," +
-                        $"{messageType}," +
-                        $"{providerId}," +
-                        $"{driver.PromoId.ToSqlValue()}," +
-                        $"{driver.CampaignTypeId.ToSqlValue()}," +
-                        $"{driver.SourcePlatformId.ToSqlValue()}," +
-                        $"{driver.UIReferenceDataId.ToSqlValue()}," +
-                        $"{driver.OriginatorId.ToSqlValue()}," +
-                        $"{driver.DisplayCategoryId.ToSqlValue()}," +
-                        "NULL," + 
-                        "NULL," + 
-                        $"'{BvJson.Serialize(data)}'" +
-                    ")";
-        }
+        public static string GenerateRuleSql(RuleType ruleType, int messageType, DriverKey driver, object data) =>
+            "INSERT INTO BusinessRule " +
+            "(" +
+                "BusinessRuleTypeId," +
+                "BrokerMessageId," +
+                "ProviderId," +
+                "PromoId," +
+                "CampaignTypeId," +
+                "SourcePlatformId," +
+                "UIReferenceDataId," +
+                "OriginatorId," +
+                "DisplayCategoryId," +
+                "StateGroupId," +
+                "ZipCodeGroupId," +
+                "Data" +
+            ")" +
+            "VALUES" +
+            "(" +
+                $"{(int)ruleType}," +
+                $"{messageType}," +
+                $"{driver.ProviderId.ToSqlValue()}," +
+                $"{driver.PromoId.ToSqlValue()}," +
+                $"{driver.CampaignTypeId.ToSqlValue()}," +
+                $"{driver.SourcePlatformId.ToSqlValue()}," +
+                $"{driver.UIReferenceDataId.ToSqlValue()}," +
+                $"{driver.OriginatorId.ToSqlValue()}," +
+                $"{driver.DisplayCategoryId.ToSqlValue()}," +
+                "NULL," +
+                "NULL," +
+                $"'{BvJson.Serialize(data)}'" +
+            ")";
     }
 }

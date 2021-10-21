@@ -32,6 +32,7 @@ namespace BusinessRulesMigrator.Common
 
         public DriverKey GetDriverKey() => new DriverKey
         {
+            ProviderId = ProviderID,
             PromoId = PromoID,
             CampaignTypeId = CampaignTypeId,
             SourcePlatformId = SourcePlatformID,

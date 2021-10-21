@@ -25,9 +25,9 @@ namespace BusinessRulesMigrator
                 {
                     csv.Context.TypeConverterCache.AddConverter<int?>(new NullableInt32Converter());
                     csv.Context.TypeConverterCache.AddConverter<string>(new NullableStringConverter());
-                    var rules = csv.GetRecords<OldBusinessRule>();
+                    var rules = csv.GetRecords<OldBusinessRule>().ToArray();
 
-                    var revenueRankingRules = new RevenueRankingRuleConverter().ConvertRules(rules);
+                    var revenueRankingRules = new RevenueRankingRuleConverter().Convert(rules);
                     var overrideOrderConfirmationRules = new OverrideOrderConfirmationConverter().Convert(rules);
 
                     var newRules =

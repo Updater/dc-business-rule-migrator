@@ -6,6 +6,8 @@ namespace BusinessRulesMigrator.Common
 {
     internal class DriverKey
     {
+        public int? ProviderId { get; set; }
+
         public int? PromoId { get; set; }
 
         public int? CampaignTypeId { get; set; }
@@ -26,6 +28,7 @@ namespace BusinessRulesMigrator.Common
             {
                 int hash = 17;
 
+                hash = hash * 23 + (ProviderId.HasValue ? ProviderId.GetHashCode() : 0);
                 hash = hash * 23 + (PromoId.HasValue ? PromoId.GetHashCode() : 0);
                 hash = hash * 23 + (CampaignTypeId.HasValue ? CampaignTypeId.GetHashCode() : 0);
                 hash = hash * 23 + (SourcePlatformId.HasValue ? SourcePlatformId.GetHashCode() : 0);
