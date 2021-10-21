@@ -14,6 +14,7 @@ namespace BusinessRulesMigrator.Common.Extensions
         {
             public const string Offer = "Offer";
             public const string OrderConfirmation = "OrderConfirmation";
+            public const string Customization = "Customization";
         }
 
         static class EntityAttribute
@@ -22,6 +23,7 @@ namespace BusinessRulesMigrator.Common.Extensions
             public const string OrderingMethod = "OrderingMethod";
             public const string ProviderFollowUpMessage = "ProviderFollowUpMessage";
             public const string ProviderFollowUpMessageByResultCode = "ProviderFollowUpMessageByResultCode";
+            public const string Prepopulate = "Prepopulate";
         }
 
         public static OldBusinessRule[] RevenueRankingRules(this IEnumerable<OldBusinessRule> rules) =>
@@ -44,6 +46,12 @@ namespace BusinessRulesMigrator.Common.Extensions
             rules
             .Where(r => r.Entity.SameAs(Entity.OrderConfirmation))
             .Where(r => r.IsFollowUpMessage() || r.IsFollowUpMessageByResultCode())
+            .ToArray();
+
+        public static OldBusinessRule[] OverrideValidationGroupRules(this IEnumerable<OldBusinessRule> rules) =>
+            rules
+            .Where(r => r.ProviderID.HasValue)
+            .Where(r => r.Entity.SameAs(Entity.Customization) && r.EntityAttribute.SameAs(EntityAttribute.Prepopulate))
             .ToArray();
 
         public static string ToSqlValue(this int? value) => value.HasValue ? value.Value.ToString() : "NULL";
