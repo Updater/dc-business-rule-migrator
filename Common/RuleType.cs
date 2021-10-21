@@ -14,10 +14,11 @@ namespace BusinessRulesMigrator.Common
         RemoveOffersForProvider = 4,
         ConditionalOfferAvailability = 5,
         OverrideOffer = 6,
-        OverrideOfferGroup = 7,
-        OverrideOfferRevenueRanking = 8,
-        OverrideOfferOrderingMethod = 9,
-        OverrideValidationGroup = 10,
-        OverrideOrderConfirmation = 11,
+        OverrideOfferRevenueRanking = 7,
+        OverrideOfferOrderingMethod = 8,
+        OverrideValidationGroup = 9,
+        OverrideOrderConfirmation = 10,
+        InjectCustomizations = 11,
+        AddChannelLineupToOffers = 12,
     }
 }

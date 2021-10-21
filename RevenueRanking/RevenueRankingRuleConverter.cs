@@ -5,111 +5,86 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using BusinessRulesMigrator.Common;
-using BusinessRulesMigrator.Common.Offers;
+using BusinessRulesMigrator.Common.Extensions;
+using Bridgevine;
+using static BusinessRulesMigrator.Helpers;
 
 namespace BusinessRulesMigrator.RevenueRanking
 {
     internal class RevenueRankingRuleConverter
     {
-        public List<string> ConvertRules(IEnumerable<OldBusinessRule> rules)
+        private string GetRevenueRanking(int revenueRanking) => revenueRanking switch
+        {
+            2 => "Two",
+            3 => "Three",
+            4 => "Four",
+            5 => "Five",
+            _ => "One"
+        };
+
+        public List<string> Convert(IEnumerable<OldBusinessRule> rules)
         {
             var converted = new List<string>();
-            Dictionary<DriverKey, List<Item>> newRules = new Dictionary<DriverKey, List<Item>>();
 
-            foreach (var rule in rules)
+            var groups = rules.RevenueRankingRules().GroupBy(r => r.GetDriverKey());
+
+            if (!groups.Any()) return converted;
+
+            var dataByDriver = new Dictionary<DriverKey, List<Item>>();
+
+            foreach (var group in groups)
             {
-                //ProviderID required for this rule
-                if (!rule.ProviderID.HasValue)
+                var driver = group.Key;
+
+                if (!dataByDriver.TryGetValue(driver, out var data))
                 {
-                    continue;
+                    data = new List<Item>();
+                    dataByDriver[driver] = data;
                 }
 
-                int rr;
-                if (!int.TryParse(rule.value, out rr))
+                foreach (var rule in group.ToList())
                 {
-                    Console.WriteLine($"ERROR: an non integer RevenueRanking value found in BusinessRuleID {rule.BusinessRuleID}.  Value: {rule.value}");
-                    continue;
-                }
-                else if (rr == 0)
-                {
-                    //skip 0 value rules, they are unnecessary
-                    continue;
-                }
-                else if (rr < 1 || rr > 5)
-                {
-                    Console.WriteLine($"ERROR: an out of bounds RevenueRanking value found in BusinessRuleID {rule.BusinessRuleID}.  Value: {rule.value}");
-                    continue;
-                }
-                
-                var revenueRanking = GetRevenueRankingString(rr);
-                var key = Helpers.GetKey(rule);
-                List<Item> items = null;
-
-                if (newRules.ContainsKey(key))
-                {
-                    items = newRules[key];
-                }
-                else
-                {
-                    items = new List<Item>
+                    if (!int.TryParse(rule.value, out int value))
                     {
-                        new Item
+                        Console.WriteLine($"ERROR: A non integer RevenueRanking value found. BusinessRuleID {rule.BusinessRuleID} Value: {rule.value}");
+                        continue;
+                    }
+                    else if (value == 0)
+                    {
+                        continue;
+                    }
+                    else if (value < 1 || value > 5)
+                    {
+                        Console.WriteLine($"ERROR: An out of bounds RevenueRanking value found. BusinessRuleID {rule.BusinessRuleID} Value: {rule.value}");
+                        continue;
+                    }
+
+                    var revenueRanking = GetRevenueRanking(value);
+
+                    var item = data.FirstOrDefault(i => i.RevenueRanking.SameAs(revenueRanking));
+                    if (item.IsNull())
+                    {
+                        item = new Item
                         {
                             RevenueRanking = revenueRanking,
-                            Offers = new OffersSpec()
-                        }
-                    };
+                            Offers = new OffersSpec(),
+                        };
+                        data.Add(item);
+                    }
 
-                    newRules.Add(key, items);
+                    item.Offers.AddOfferCode(rule.OfferCode);
+                    item.Offers.AddProductByCategory(rule.OfferTypeID);
+                    item.Offers.AddProductByType(rule.OfferSubTypeID);
                 }
-
-                var item = items.FirstOrDefault(i => string.Equals(i.RevenueRanking, revenueRanking));
-                if (item is null)
-                {
-                    item = new Item
-                    {
-                        RevenueRanking = revenueRanking,
-                        Offers = new OffersSpec()
-                    };
-
-                    items.Add(item);
-                }
-
-                Helpers.PopulateOfferSpecByCodeByProvider(rule, item.Offers);           
             }
 
-            foreach (var pair in newRules)
+            foreach (var (driver, data) in dataByDriver)
             {
-                var sql = Helpers.GenerateRuleSql(pair.Key, RuleType.OverrideOfferRevenueRanking, 1, pair.Value);
-
-                if (!string.IsNullOrEmpty(sql))
-                {
-                    converted.Add(sql);
-                }
+                if (data.Any())
+                    converted.Add(GenerateRuleSql(RuleType.OverrideOfferRevenueRanking, Operation.GetOfferAvailability, driver, data));
             }
 
             return converted;
-        }
-
-        
-
-        private string GetRevenueRankingString(int revenueRanking)
-        {
-            switch (revenueRanking)
-            {
-                case 1:
-                    return "One";
-                case 2:
-                    return "Two";
-                case 3:
-                    return "Three";
-                case 4:
-                    return "Four";
-                case 5:
-                    return "Five";
-                default:
-                    return "One";
-            }
         }
     }
 }

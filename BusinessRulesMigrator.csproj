@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bridgevine.Core" Version="4.8.48" />
     <PackageReference Include="CsvHelper" Version="27.1.1" />
   </ItemGroup>
 

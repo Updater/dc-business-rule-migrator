@@ -7,8 +7,8 @@ namespace BusinessRulesMigrator.RevenueRanking
 {
     internal class Item
     {
-        public Item() { }
         public string RevenueRanking { get; set; }
+
         public OffersSpec Offers { get; set; }
     }
 }

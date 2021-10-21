@@ -6,6 +6,10 @@ namespace BusinessRulesMigrator.Common
 {
     internal class OldBusinessRule
     {
+        public string Entity { get; set; }
+
+        public string EntityAttribute { get; set; }
+
         public int BusinessRuleID { get; set; }
         public int? SourcePlatformID { get; set; }
         public int? PromoID { get; set; }
@@ -25,5 +29,17 @@ namespace BusinessRulesMigrator.Common
         public int? CampaignTypeId { get; set; }
         public string BundledOfferTypeIDs { get; set; }
         public string StateCode { get; set; }
+
+        public DriverKey GetDriverKey() => new DriverKey
+        {
+            ProviderId = ProviderID,
+            PromoId = PromoID,
+            CampaignTypeId = CampaignTypeId,
+            SourcePlatformId = SourcePlatformID,
+            UIReferenceDataId = UIReferenceDataID,
+            OriginatorId = OriginatorID,
+            DisplayCategoryId = DisplayCategoryID,
+            PostalCodeGroupId = PostalCodeGroupID,
+        };
     }
 }

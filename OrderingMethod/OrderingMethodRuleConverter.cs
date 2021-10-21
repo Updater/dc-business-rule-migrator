@@ -5,103 +5,73 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using BusinessRulesMigrator.Common;
-using BusinessRulesMigrator.Common.Offers;
+using BusinessRulesMigrator.Common.Extensions;
+using Bridgevine;
+using static BusinessRulesMigrator.Helpers;
 
 namespace BusinessRulesMigrator.OrderingMethod
 {
     internal class OrderingMethodRuleConverter
     {
-        public List<string> ConvertRules(IEnumerable<OldBusinessRule> rules)
+        public List<string> Convert(IEnumerable<OldBusinessRule> rules)
         {
             var converted = new List<string>();
-            Dictionary<DriverKey, List<Item>> newRules = new Dictionary<DriverKey, List<Item>>();
 
-            foreach (var rule in rules)
+            var groups = rules.OrderingMethodRules().GroupBy(r => r.GetDriverKey());
+
+            if (!groups.Any()) return converted;
+
+            var dataByDriver = new Dictionary<DriverKey, List<Item>>();
+
+            foreach (var group in groups)
             {
-                //ProviderID required for this rule
-                if (!rule.ProviderID.HasValue)
+                var driver = group.Key;
+
+                if (!dataByDriver.TryGetValue(driver, out var data))
                 {
-                    continue;
+                    data = new List<Item>();
+                    dataByDriver[driver] = data;
                 }
 
-                string[] values = rule.value.Split('~');
-
-                if (values.Length < 1)
+                foreach (var rule in group.ToList())
                 {
-                    Console.WriteLine($"ERROR: Invalid rule value in OrderingMethod rule.  BusinessRuleID: {rule.BusinessRuleID}  Value: {rule.value}");
-                    continue;
-                }
+                    var values = rule.value.GetList(false, @"[~]");
 
-                var orderingMethod = new OrderingMethodData();
-                for (var i = 0; i < values.Length; i++)
-                {
-                    var value = values[i].Trim();
-
-                    if (string.IsNullOrEmpty(value))
+                    if (!values.Any())
                     {
+                        Console.WriteLine($"ERROR: Invalid rule value in OrderingMethod rule. BusinessRuleID: {rule.BusinessRuleID} Value: {rule.value}");
                         continue;
                     }
 
-                    switch (i)
+                    var orderingMethod = new OrderingMethodData 
                     {
-                        case 0:
-                            orderingMethod.Type = value;
-                            break;
-                        case 1:
-                            orderingMethod.ImageUrl = value;
-                            break;
-                        case 2:
-                            orderingMethod.ExternalUrl = value;
-                            break;
-                        case 3:
-                            orderingMethod.Instructions = value;
-                            break;
-                    }
-                }
-
-                var key = Helpers.GetKey(rule);
-                List<Item> items;
-
-                if (newRules.ContainsKey(key))
-                {
-                    items = newRules[key];
-                }
-                else
-                {
-                    items = new List<Item>
-                        {
-                            new Item
-                            {
-                                OrderingMethod = orderingMethod,
-                                Offers = new OffersSpec()
-                            }
-                        };
-
-                    newRules.Add(key, items);
-                }
-
-                var item = items.FirstOrDefault(i => i.OrderingMethod.Equals(orderingMethod));
-
-                if (item is null)
-                {
-                    item = new Item
-                    {
-                        OrderingMethod = orderingMethod,
-                        Offers = new OffersSpec()
+                        Type = values[0],
+                        ImageUrl = values.Count > 1 ? values[1] : null,
+                        ExternalUrl = values.Count > 2 ? values[2] : null,
+                        Instructions = values.Count > 3 ? values[3] : null,
                     };
-                }
 
-                Helpers.PopulateOfferSpecByCodeByProvider(rule, item.Offers);
+                    var item = data.FirstOrDefault(i => i.OrderingMethod.SameAs(orderingMethod));
+                    if (item.IsNull())
+                    {
+                        item = new Item
+                        {
+                            OrderingMethod = orderingMethod,
+                            Offers = new OffersSpec(),
+                        };
+                        data.Add(item);
+                    }
+
+                    item.Offers.AddOfferCode(rule.OfferCode);
+                    item.Offers.AddProductByCategory(rule.OfferTypeID);
+                    item.Offers.AddProductByType(rule.OfferSubTypeID);
+                }
             }
 
-            foreach (var pair in newRules)
+            foreach (var (driver, data) in dataByDriver)
             {
-                var sql = Helpers.GenerateRuleSql(pair.Key, RuleType.OverrideOfferRevenueRanking, 1, pair.Value);
-
-                if (!string.IsNullOrEmpty(sql))
-                {
-                    converted.Add(sql);
-                }
+                if (data.Any())
+                    converted.Add(GenerateRuleSql(RuleType.OverrideOfferOrderingMethod, Operation.GetOfferAvailability, driver, data));
             }
 
             return converted;
