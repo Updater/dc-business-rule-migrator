@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using BusinessRulesMigrator.Common;
 using BusinessRulesMigrator.Common.Extensions;
-using BusinessRulesMigrator.Common.Offers;
 using Bridgevine;
+using static BusinessRulesMigrator.Helpers;
 
 namespace BusinessRulesMigrator.OverrideOrderConfirmation
 {
@@ -26,9 +26,21 @@ namespace BusinessRulesMigrator.OverrideOrderConfirmation
             {
                 var driver = group.Key;
 
+                if (!dataByDriver.TryGetValue(driver, out var data))
+                {
+                    data = new List<Item>();
+                    dataByDriver[driver] = data;
+                }
+
                 foreach (var rule in group.ToList())
                 {
                 }
+            }
+
+            foreach (var (driver, data) in dataByDriver)
+            {
+                if (data.Any())
+                    converted.Add(GenerateRuleSql(RuleType.OverrideOrderConfirmation, Operation.SubmitOrder, driver, data));
             }
 
             return converted;
