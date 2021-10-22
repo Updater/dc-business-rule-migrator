@@ -56,7 +56,7 @@ namespace BusinessRulesMigrator.Common.Extensions
 
         public static string ToSqlValue(this int? value) => value.HasValue ? value.Value.ToString() : "NULL";
 
-        public static string ToSqlValue(this string value) => value == null ? "NULL" : $"'{value}'";
+        public static string ToSqlValue(this string value) => value == null ? "NULL" : $"'{value.Replace("'", "''")}'";
 
     }
 }
