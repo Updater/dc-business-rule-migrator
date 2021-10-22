@@ -11,6 +11,7 @@ using BusinessRulesMigrator.Common.Extensions;
 using BusinessRulesMigrator.RevenueRanking;
 using BusinessRulesMigrator.OrderingMethod;
 using BusinessRulesMigrator.OverrideOrderConfirmation;
+using BusinessRulesMigrator.OverrideOffer;
 using System.Threading.Tasks;
 
 namespace BusinessRulesMigrator
@@ -31,11 +32,13 @@ namespace BusinessRulesMigrator
                     var revenueRankingRules = new RevenueRankingRuleConverter().Convert(rules);
                     var orderingMethodRules = new OrderingMethodRuleConverter().Convert(rules);
                     var overrideOrderConfirmationRules = new OverrideOrderConfirmationConverter().Convert(rules);
+                    var overrideOfferRules = new OverrideOfferConverter().Convert(rules);
 
                     var newRules =
                         revenueRankingRules
                         .Concat(orderingMethodRules)
-                        .Concat(overrideOrderConfirmationRules);
+                        .Concat(overrideOrderConfirmationRules)
+                        .Concat(overrideOfferRules);
 
                     if (newRules.Any())
                     {

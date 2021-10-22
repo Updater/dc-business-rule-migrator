@@ -17,7 +17,7 @@ namespace BusinessRulesMigrator.OverrideOffer
         {
             var converted = new List<string>();
 
-            var groups = rules.RevenueRankingRules().GroupBy(r => r.GetDriverKey());
+            var groups = rules.OverrideOfferRules().GroupBy(r => r.GetDriverKey());
 
             if (!groups.Any()) return converted;
 
@@ -42,21 +42,16 @@ namespace BusinessRulesMigrator.OverrideOffer
 
                     string fieldName = rule.Entity.SameAs(Extensions.Entity.Offer) ? rule.EntityAttribute : rule.Entity;
 
-                    data.OverrideByCode(rule.ProviderID.Value, rule.OfferCode, fieldName, rule.value);
-
-                    if (!rule.OfferCode.IsBlank())
-                    {
-                        if (data.ByCode.IsNull())
-                        {
-                            data.ByCode = new OfferData[] { new OfferData { Code = rule.OfferCode } };
-                        }
-
-                        var offer = data.ByCode.FirstOrDefault(od => od.Code.SameAs(rule.OfferCode));
-                    }
-
-                    
+                    data.OverrideByCode(rule.ProviderID.Value, rule.OfferCode, fieldName, rule.value, rule.ActionTypeID);
+                    data.OverrideByProduct(rule.OfferTypeID, rule.OfferSubTypeID, fieldName, rule.value, rule.ActionTypeID);
                 }
 
+            }
+
+            foreach (var (driver, data) in dataByDriver)
+            {
+                if ((!data.ByCode.IsNull() && data.ByCode.Any()) || (!data.ByCode.IsNull() && data.ByProducts.Any()))
+                    converted.Add(GenerateRuleSql(RuleType.OverrideOffer, Operation.GetOfferAvailability, driver, data));
             }
 
             return converted;

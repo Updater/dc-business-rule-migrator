@@ -70,7 +70,7 @@ namespace BusinessRulesMigrator.OverrideOffer
 
         public OrderingMethodData OrderingMethod { get; set; }
 
-        public virtual void OverrideOfferProperty(string propertyName, string value)
+        public virtual void OverrideOfferProperty(string propertyName, string value, int actionTypeId)
         {
             switch (propertyName)
             {
@@ -81,7 +81,10 @@ namespace BusinessRulesMigrator.OverrideOffer
                     AddPromotion(value);
                     break;
                 case Extensions.EntityAttribute.ShortTermPrice:
-
+                case Extensions.EntityAttribute.DepositPrice:
+                case Extensions.EntityAttribute.HardwarePrice:
+                case Extensions.EntityAttribute.InstallPrice:
+                    OverridePrice(propertyName, value, actionTypeId);
                     break;
             }
         }
@@ -108,6 +111,39 @@ namespace BusinessRulesMigrator.OverrideOffer
             }
 
             Promotions.Items.Add(new PromotionItem { Id = value });
+        }
+
+        private void OverridePrice(string category, string value, int actionTypeId)
+        {
+            if (Prices.IsNull())
+            {
+                Prices = new List<PriceData>();
+            }
+
+            var add = false;
+            var pd = new PriceData { Category = category };
+
+            switch (actionTypeId)
+            {
+                case (int)BusinessRuleAction.Add:
+                    pd.Action = "AddIfNoneExists";
+                    if (int.TryParse(value, out int pid))
+                    {
+                        pd.Id = pid;
+                        add = true;
+                    }
+                    
+                    break;
+                case (int)BusinessRuleAction.Delete:
+                    pd.Action = "Remove";
+                    add = true;
+                    break;
+            }
+
+            if (add)
+            {
+                Prices.Add(pd);
+            }
         }
     }
 
@@ -151,7 +187,7 @@ namespace BusinessRulesMigrator.OverrideOffer
 
         public string QualifiedHardware { get; set; }
 
-        public override void OverrideOfferProperty(string propertyName, string value)
+        public override void OverrideOfferProperty(string propertyName, string value, int actionTypeId)
         {
             switch (propertyName)
             {
@@ -161,7 +197,7 @@ namespace BusinessRulesMigrator.OverrideOffer
                 case Extensions.EntityAttribute.HardwarePrice:
                 case Extensions.EntityAttribute.InstallPrice:
                 case Extensions.EntityAttribute.ShortTermPrice:
-                    base.OverrideOfferProperty(propertyName, value);
+                    base.OverrideOfferProperty(propertyName, value, actionTypeId);
                     break;
                 default:
                     var prop = typeof(OfferData).GetProperty(propertyName);
@@ -180,29 +216,27 @@ namespace BusinessRulesMigrator.OverrideOffer
 
         public OfferDataBase OfferData { get; set; }
 
-        public void AddProduct(int? offerTypeId, int? offerSubTypeId, string propertyName, string value)
+        public void AddProduct(int? offerTypeId, int? offerSubTypeId, string propertyName, string value, int actionTypeId)
         {
             if (OfferData.IsNull())
             {
                 OfferData = new OfferDataBase();
             }
 
-            OfferData.OverrideOfferProperty(propertyName, value);
+            OfferData.OverrideOfferProperty(propertyName, value, actionTypeId);
 
             if (offerTypeId.HasValue)
             {
-                AddProductByCategory(offerTypeId, propertyName, value);
+                AddProductByCategory(offerTypeId.Value);
             }
             else
             {
-                AddProductByType(offerSubTypeId, propertyName, value);
+                AddProductByType(offerSubTypeId.Value);
             }
         }
 
-        private void AddProductByCategory(int? category, string propertyName, string value)
+        private void AddProductByCategory(int category)
         {
-            if (!category.HasValue || !Offer.OfferCategories.ContainsKey(category.Value)) return;
-
             if (Filter.IsNull())
             {
                 Filter = new ByProducts
@@ -219,13 +253,13 @@ namespace BusinessRulesMigrator.OverrideOffer
                 {
                     new Product
                     {
-                        Category = Offer.OfferCategories[category.Value]
+                        Category = Offer.OfferCategories[category]
                     }
                 }
             });
         }
 
-        private void AddProductByType(int? type, string propertyName, string value)
+        private void AddProductByType(int type)
         {
             if (Filter.IsNull())
             {
@@ -236,7 +270,7 @@ namespace BusinessRulesMigrator.OverrideOffer
                 };
             }
 
-            var r = Offer.OfferTypes[type.Value];
+            var r = Offer.OfferTypes[type];
 
             Filter.Specs.Add(new ProductSpec
             {
@@ -259,7 +293,7 @@ namespace BusinessRulesMigrator.OverrideOffer
 
         public List<OverrideOfferByProducts> ByProducts { get; set; }
 
-        public void OverrideByCode(int providerId, string code, string propertyName, string value)
+        public void OverrideByCode(int providerId, string code, string propertyName, string value, int actionTypeId)
         {
             if (code.IsBlank() || code.SameAs("NULL")) return;
 
@@ -279,10 +313,10 @@ namespace BusinessRulesMigrator.OverrideOffer
                 }
             }
 
-            offerData.OverrideOfferProperty(propertyName, value);
+            offerData.OverrideOfferProperty(propertyName, value, actionTypeId);
         }
 
-        public void OverrideByProduct(int? offerTypeId, int? offerSubTypeId, string propertyName, string value)
+        public void OverrideByProduct(int? offerTypeId, int? offerSubTypeId, string propertyName, string value, int actionTypeId)
         {
             if (!offerTypeId.HasValue && !offerSubTypeId.HasValue) return;
 
@@ -292,7 +326,7 @@ namespace BusinessRulesMigrator.OverrideOffer
             }
 
             var obp = new OverrideOfferByProducts();
-            obp.AddProduct(offerTypeId, offerSubTypeId, propertyName, value);
+            obp.AddProduct(offerTypeId, offerSubTypeId, propertyName, value, actionTypeId);
         }
     }
     
