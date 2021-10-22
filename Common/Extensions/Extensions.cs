@@ -15,6 +15,7 @@ namespace BusinessRulesMigrator.Common.Extensions
             public const string Offer = "Offer";
             public const string OrderConfirmation = "OrderConfirmation";
             public const string Customization = "Customization";
+            public const string Choice = "Choice";
         }
 
         static class EntityAttribute
@@ -24,6 +25,11 @@ namespace BusinessRulesMigrator.Common.Extensions
             public const string ProviderFollowUpMessage = "ProviderFollowUpMessage";
             public const string ProviderFollowUpMessageByResultCode = "ProviderFollowUpMessageByResultCode";
             public const string Prepopulate = "Prepopulate";
+        }
+
+        static class Action
+        {
+            public const int Replace = 4;
         }
 
         public static OldBusinessRule[] RevenueRankingRules(this IEnumerable<OldBusinessRule> rules) =>
@@ -48,15 +54,31 @@ namespace BusinessRulesMigrator.Common.Extensions
             .Where(r => r.IsFollowUpMessage() || r.IsFollowUpMessageByResultCode())
             .ToArray();
 
+        public static bool IsCustomizationPrepopulate(this OldBusinessRule r) =>
+            r.Entity.SameAs(Entity.Customization) && r.EntityAttribute.SameAs(EntityAttribute.Prepopulate);
+
+        public static bool IsOverrideCustomization(this OldBusinessRule r) =>
+            r.ActionTypeID == Action.Replace &&
+            r.Entity.SameAs(Entity.Customization) && 
+            r.EntityAttribute.IsNotBlank() &&
+            r.EntityAttribute.SameAs(r.CustomizationCode) &&
+            r.ChoiceCode.IsBlank();
+
+        public static bool IsOverrideChoice(this OldBusinessRule r) =>
+            r.ActionTypeID == Action.Replace &&
+            r.Entity.SameAs(Entity.Choice) &&
+            r.EntityAttribute.IsNotBlank() &&
+            r.EntityAttribute.SameAs(r.ChoiceCode) &&
+            r.CustomizationCode.IsNotBlank();
+
         public static OldBusinessRule[] OverrideValidationGroupRules(this IEnumerable<OldBusinessRule> rules) =>
             rules
             .Where(r => r.ProviderID.HasValue)
-            .Where(r => r.Entity.SameAs(Entity.Customization) && r.EntityAttribute.SameAs(EntityAttribute.Prepopulate))
+            .Where(r => r.IsCustomizationPrepopulate() || r.IsOverrideCustomization() || r.IsOverrideChoice())
             .ToArray();
 
         public static string ToSqlValue(this int? value) => value.HasValue ? value.Value.ToString() : "NULL";
 
         public static string ToSqlValue(this string value) => value == null ? "NULL" : $"'{value}'";
-
     }
 }
