@@ -42,7 +42,7 @@ namespace BusinessRulesMigrator
                 $"{driver.DisplayCategoryId.ToSqlValue()}," +
                 "NULL," +
                 "NULL," +
-                $"'{BvJson.Serialize(data)}'" +
+                $"'{BvJson.Serialize(data).Replace("'", "''")}'" +
             ")";
     }
 }
