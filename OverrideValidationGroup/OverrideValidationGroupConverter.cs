@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -9,6 +11,8 @@ using BusinessRulesMigrator.Common.Extensions;
 using Bridgevine;
 using Bridgevine.Json;
 using static BusinessRulesMigrator.Helpers;
+using CsvHelper;
+using BusinessRulesMigrator.Common.CsvHelper;
 
 namespace BusinessRulesMigrator.OverrideValidationGroup
 {
@@ -45,7 +49,6 @@ namespace BusinessRulesMigrator.OverrideValidationGroup
                         if (cust.Key.IsBlank())
                         {
                             props["Code"] = custCode;
-                            props["Choices"] = new Dictionary<string, Dictionary<string, object>>();
                             customizations[custCode] = props;
                         }
                         else
@@ -74,7 +77,12 @@ namespace BusinessRulesMigrator.OverrideValidationGroup
                         }
                         else
                         {
-                            var choices = cust.Value["Choices"] as Dictionary<string, Dictionary<string, object>>;
+                            var choices = cust.Value.ContainsKey("Choices") ? cust.Value["Choices"] as Dictionary<string, Dictionary<string, object>> : null;
+                            if (choices.IsNull())
+                            {
+                                choices = new Dictionary<string, Dictionary<string, object>>();
+                                cust.Value["Choices"] = choices;
+                            }
                             var choice = choices.FirstOrDefault(kv => kv.Key.SameAs(choiceCode));
 
                             if (choice.Key.IsBlank())
@@ -193,26 +201,65 @@ namespace BusinessRulesMigrator.OverrideValidationGroup
                             }
                             else
                             {
-                                Console.WriteLine($"ERROR: Invalid Prepopulate Customization, the value column is not properly defined. BusinessRuleID {rule.BusinessRuleID} Value: {rule.value}");
+                                Console.WriteLine($"ERROR: Invalid section in Prepopulate Customization. BusinessRuleID {rule.BusinessRuleID} Section: {value}");
                                 continue;
                             }
                         }
                     }
+                }
 
-                    //var item = data.FirstOrDefault(i => i.Message.SameAs(message) && i.Priority == priority);
-                    //if (item.IsNull())
-                    //{
-                    //    item = new Item
-                    //    {
-                    //        Message = message,
-                    //        Priority = priority,
-                    //        Criteria = new ConfirmationSpec(),
-                    //    };
-                    //    data.Add(item);
-                    //}
+                if (!customizations.Any()) continue;
 
-                    //item.Criteria.AddOfferCode(offerCode);
-                    //item.Criteria.AddResultCode(resultCode);
+                foreach (var cust in customizations.Where(c => c.Value.ContainsKey("Choices")))
+                {
+                    var choices = cust.Value["Choices"] as Dictionary<string, Dictionary<string, object>>;
+
+                    cust.Value["Choices"] = choices.Select(kv => kv.Value).ToArray();
+                }
+
+                data.Add(new Item
+                {
+                    Customizations = customizations.Select(kv => kv.Value).ToArray(),
+                });
+            }
+
+            using (var reader = new StreamReader(@"C:\BusinessRules\ValidationGroupOverrides.csv"))
+            using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+            {
+                csv.Context.TypeConverterCache.AddConverter<int?>(new NullableInt32Converter());
+                csv.Context.TypeConverterCache.AddConverter<string>(new NullableStringConverter());
+                var vgGroups = csv.GetRecords<ValidationGroupOverrideRule>().GroupBy(r => r.GetDriverKey()).ToList();
+
+                foreach (var group in vgGroups)
+                {
+                    var driver = group.Key;
+
+                    if (!dataByDriver.TryGetValue(driver, out var data))
+                    {
+                        data = new List<Item>();
+                        dataByDriver[driver] = data;
+                    }
+
+                    foreach (var rule in group.ToList())
+                    {
+                        if (rule.ValidationGroupCode.IsBlank())
+                        {
+                            Console.WriteLine($"ERROR: Validation Group Override rule is not valid, ValidationGroupCode column must not be null, empty or all whitespaces. ValidationGroupOverrideID {rule.ValidationGroupOverrideID}");
+                            continue;
+                        }
+                        if (rule.Name.IsNull() && rule.Description.IsNull())
+                        {
+                            Console.WriteLine($"ERROR: Validation Group Override rule is not valid, Name and Description columns are both null. ValidationGroupOverrideID {rule.ValidationGroupOverrideID}");
+                            continue;
+                        }
+
+                        data.Add(new Item 
+                        {
+                            Code = rule.ValidationGroupCode,
+                            Name = rule.Name,
+                            Description = rule.Description,
+                        });
+                    }
                 }
             }
 
@@ -220,9 +267,8 @@ namespace BusinessRulesMigrator.OverrideValidationGroup
             {
                 if (data.Any())
                 {
-                    data.ForEach(item => item.UpdateCriteria());
-
-                    converted.Add(GenerateRuleSql(RuleType.OverrideOrderConfirmation, Operation.SubmitOrder, driver, data));
+                    converted.Add(GenerateRuleSql(RuleType.OverrideValidationGroup, Operation.GetOrderRequirements, driver, data));
+                    converted.Add(GenerateRuleSql(RuleType.OverrideValidationGroup, Operation.ValidateOrder, driver, data));
                 }
             }
 
