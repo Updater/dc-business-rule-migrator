@@ -78,7 +78,5 @@ namespace BusinessRulesMigrator.Common.Extensions
             .ToArray();
 
         public static string ToSqlValue(this int? value) => value.HasValue ? value.Value.ToString() : "NULL";
-
-        public static string ToSqlValue(this string value) => value == null ? "NULL" : $"'{value}'";
     }
 }
