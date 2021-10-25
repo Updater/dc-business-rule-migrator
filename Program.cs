@@ -12,6 +12,7 @@ using BusinessRulesMigrator.RevenueRanking;
 using BusinessRulesMigrator.OrderingMethod;
 using BusinessRulesMigrator.OverrideOrderConfirmation;
 using BusinessRulesMigrator.OverrideValidationGroup;
+using BusinessRulesMigrator.ConditionalProviderAvailability;
 using System.Threading.Tasks;
 
 namespace BusinessRulesMigrator
@@ -33,12 +34,14 @@ namespace BusinessRulesMigrator
                     var orderingMethodRules = new OrderingMethodRuleConverter().Convert(rules);
                     var overrideOrderConfirmationRules = new OverrideOrderConfirmationConverter().Convert(rules);
                     var overrideValidationGroupRules = new OverrideValidationGroupConverter().Convert(rules);
+                    var conditionalProviderAvailabilityRules = new ConditionalProviderAvailabilityConverter().Convert(rules);
 
                     var newRules =
                         revenueRankingRules
                         .Concat(orderingMethodRules)
                         .Concat(overrideOrderConfirmationRules)
                         .Concat(overrideValidationGroupRules)
+                        .Concat(conditionalProviderAvailabilityRules)
                         .ToArray();
 
                     if (newRules.Any())

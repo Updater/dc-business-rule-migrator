@@ -16,6 +16,7 @@ namespace BusinessRulesMigrator.Common.Extensions
             public const string OrderConfirmation = "OrderConfirmation";
             public const string Customization = "Customization";
             public const string Choice = "Choice";
+            public const string Provider = "Provider";
         }
 
         static class EntityAttribute
@@ -25,6 +26,7 @@ namespace BusinessRulesMigrator.Common.Extensions
             public const string ProviderFollowUpMessage = "ProviderFollowUpMessage";
             public const string ProviderFollowUpMessageByResultCode = "ProviderFollowUpMessageByResultCode";
             public const string Prepopulate = "Prepopulate";
+            public const string ConditionalProviders = "ConditionalProviders";
         }
 
         static class Action
@@ -75,6 +77,10 @@ namespace BusinessRulesMigrator.Common.Extensions
             rules
             .Where(r => r.ProviderID.HasValue)
             .Where(r => r.IsCustomizationPrepopulate() || r.IsOverrideCustomization() || r.IsOverrideChoice())
+            .ToArray();
+
+        public static OldBusinessRule[] ConditionalProvidersRules(this IEnumerable<OldBusinessRule> rules) =>
+            rules.Where(r => r.Entity.SameAs(Entity.Provider) && r.EntityAttribute.SameAs(EntityAttribute.ConditionalProviders))
             .ToArray();
 
         public static string ToSqlValue(this int? value) => value.HasValue ? value.Value.ToString() : "NULL";
