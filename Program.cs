@@ -11,6 +11,7 @@ using BusinessRulesMigrator.Common.Extensions;
 using BusinessRulesMigrator.RevenueRanking;
 using BusinessRulesMigrator.OrderingMethod;
 using BusinessRulesMigrator.OverrideOrderConfirmation;
+using BusinessRulesMigrator.OverrideOffer;
 using BusinessRulesMigrator.OverrideValidationGroup;
 using BusinessRulesMigrator.ConditionalProviderAvailability;
 using System.Threading.Tasks;
@@ -33,6 +34,7 @@ namespace BusinessRulesMigrator
                     var revenueRankingRules = new RevenueRankingRuleConverter().Convert(rules);
                     var orderingMethodRules = new OrderingMethodRuleConverter().Convert(rules);
                     var overrideOrderConfirmationRules = new OverrideOrderConfirmationConverter().Convert(rules);
+                    var overrideOfferRules = new OverrideOfferConverter().Convert(rules);
                     var overrideValidationGroupRules = new OverrideValidationGroupConverter().Convert(rules);
                     var conditionalProviderAvailabilityRules = new ConditionalProviderAvailabilityConverter().Convert(rules);
 
@@ -40,6 +42,7 @@ namespace BusinessRulesMigrator
                         revenueRankingRules
                         .Concat(orderingMethodRules)
                         .Concat(overrideOrderConfirmationRules)
+                        .Concat(overrideOfferRules)
                         .Concat(overrideValidationGroupRules)
                         .Concat(conditionalProviderAvailabilityRules)
                         .ToArray();
