@@ -42,8 +42,8 @@ namespace BusinessRulesMigrator.OverrideOffer
 
                     string fieldName = rule.Entity.SameAs(Extensions.Entity.Offer) ? rule.EntityAttribute : rule.Entity;
 
-                    data.OverrideByCode(rule.ProviderID.Value, rule.OfferCode, fieldName, rule.value, rule.ActionTypeID);
-                    data.OverrideByProduct(rule.OfferTypeID, rule.OfferSubTypeID, fieldName, rule.value, rule.ActionTypeID);
+                    data.OverrideByCode(rule.ProviderID.Value, rule.OfferCode, fieldName, rule.value, rule.ActionTypeID.Value);
+                    data.OverrideByProduct(rule.OfferTypeID, rule.OfferSubTypeID, fieldName, rule.value, rule.ActionTypeID.Value);
                 }
 
             }

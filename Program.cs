@@ -42,7 +42,7 @@ namespace BusinessRulesMigrator
                         revenueRankingRules
                         .Concat(orderingMethodRules)
                         .Concat(overrideOrderConfirmationRules)
-                        .Concat(overrideOfferRules);
+                        .Concat(overrideOfferRules)
                         .Concat(overrideValidationGroupRules)
                         .ToArray();
 

@@ -100,8 +100,6 @@ namespace BusinessRulesMigrator.Common.Extensions
             )
             .ToArray();
 
-        public static string ToSqlValue(this int? value) => value.HasValue ? value.Value.ToString() : "NULL";
-
         public static bool IsCustomizationPrepopulate(this OldBusinessRule r) =>
             r.Entity.SameAs(Entity.Customization) && r.EntityAttribute.SameAs(EntityAttribute.Prepopulate);
 
