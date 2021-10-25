@@ -6,12 +6,11 @@ namespace BusinessRulesMigrator.Common
 {
     internal class OldBusinessRule
     {
-        public string Entity { get; set; }
-
-        public string EntityAttribute { get; set; }
-
         public int BusinessRuleID { get; set; }
-        public int ActionTypeID { get; set; }
+        public string Entity { get; set; }
+        public string EntityAttribute { get; set; }
+        public int BusinessRuleID { get; set; }
+        public int? ActionTypeID { get; set; }
         public int? SourcePlatformID { get; set; }
         public int? PromoID { get; set; }
         public int? UIReferenceDataID { get; set; }

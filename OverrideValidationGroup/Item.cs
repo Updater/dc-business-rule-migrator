@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using BusinessRulesMigrator.Common;
 using Bridgevine;
 
-namespace BusinessRulesMigrator.OverrideOrderConfirmation
+namespace BusinessRulesMigrator.OverrideValidationGroup
 {
     class ResultCodesSet
     {
@@ -86,21 +86,12 @@ namespace BusinessRulesMigrator.OverrideOrderConfirmation
 
     class Item
     {
-        public string Message { get; set; }
+        public string Code { get; set; }
 
-        public int Priority { get; set; }
+        public string Name { get; set; }
 
-        public ConfirmationSpec Criteria { get; set; }
+        public string Description { get; set; }
 
-        public void UpdateCriteria()
-        {
-            if (Criteria.IsNull()) return;
-
-            var hasOfferSpecs = (Criteria.Offers?.Specs).Safe().Any(s => s.HasConstraints());
-            var hasResultCodesSpecs = (Criteria.ResultCodes?.Specs).Safe().Any(s => s.Codes.Safe().Any());
-
-            if (!hasOfferSpecs && !hasResultCodesSpecs)
-                Criteria = null;
-        }
+        public Dictionary<string, object>[] Customizations { get; set; }
     }
 }
