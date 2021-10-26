@@ -78,7 +78,7 @@ namespace BusinessRulesMigrator.OverrideOffer
                     AddBonus(value);
                     break;
                 case Extensions.Entity.Promotion:
-                    AddPromotion(value);
+                    OverridePromotion(value, actionTypeId);
                     break;
                 case Extensions.EntityAttribute.ShortTermPrice:
                 case Extensions.EntityAttribute.DepositPrice:
@@ -101,16 +101,50 @@ namespace BusinessRulesMigrator.OverrideOffer
             Bonuses.Add(value);
         }
 
-        private void AddPromotion(string value)
+        private void OverridePromotion(string value, int actionTypeId)
         {
             if (value.IsBlank()) return;
 
-            if (Promotions.IsNull())
+            var add = false;
+            var pi = new PromotionItem();
+
+            switch (actionTypeId)
             {
-                Promotions = new PromotionData { Items = new List<PromotionItem>() };
+                case (int)BusinessRuleAction.Add:
+                    pi.Action = "Add";
+                    if (int.TryParse(value, out var pid))
+                    {
+                        pi.Id = value;
+                        add = true;
+                    }
+                    break;
+
+                case (int)BusinessRuleAction.Replace:
+                    pi.Action = "ReplaceExistingOne";
+                    if (int.TryParse(value, out pid))
+                    {
+                        pi.Id = value;
+                        add = true;
+                    }
+                    break;
+
+                case (int)BusinessRuleAction.Delete:
+                    Promotions.RemoveAll = true;
+                    add = true;
+                    break;
             }
 
-            Promotions.Items.Add(new PromotionItem { Id = value });
+
+            if (add)
+            {
+                if (Promotions.IsNull())
+                {
+                    Promotions = new PromotionData { Items = new List<PromotionItem>() };
+                }
+
+                Promotions.Items.Add(pi);
+            }
+            
         }
 
         private void OverridePrice(string category, string value, int actionTypeId)
