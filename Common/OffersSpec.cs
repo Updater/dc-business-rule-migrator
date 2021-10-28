@@ -21,6 +21,9 @@ namespace BusinessRulesMigrator.Common
             (ByCode?.Codes).Safe().Any() ||
             (ByProducts?.Specs).Safe().Any();
 
+        public bool HasProviderConstraint(string providerId) =>
+            (ByProvider?.IDs).Safe().Any(pid => pid.SameAs(providerId));
+
         public void AddOfferCode(string code)
         {
             if (code.IsBlank() || code.SameAs("NULL")) return;

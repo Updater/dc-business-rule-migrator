@@ -29,9 +29,9 @@ namespace BusinessRulesMigrator.Common
         public string BundledOfferTypeIDs { get; set; }
         public string StateCode { get; set; }
 
-        public DriverKey GetDriverKey() => new DriverKey
+        public DriverKey GetDriverKey(bool isProviderSpecific = true) => new DriverKey
         {
-            ProviderId = ProviderID,
+            ProviderId = isProviderSpecific ? ProviderID : null,
             PromoId = PromoID,
             CampaignTypeId = CampaignTypeId,
             SourcePlatformId = SourcePlatformID,

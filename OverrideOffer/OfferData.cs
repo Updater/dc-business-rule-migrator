@@ -105,20 +105,14 @@ namespace BusinessRulesMigrator.OverrideOffer
         {
             if (value.IsBlank()) return;
 
-            if (Promotions.IsNull())
-            {
-                Promotions = new PromotionData { Items = new List<PromotionItem>() };
-            }
+            Promotions ??= new PromotionData { Items = new List<PromotionItem>() };
 
             Promotions.Items.Add(new PromotionItem { Id = value });
         }
 
         private void OverridePrice(string category, string value, int actionTypeId)
         {
-            if (Prices.IsNull())
-            {
-                Prices = new List<PriceData>();
-            }
+            Prices ??= new List<PriceData>();
 
             var add = false;
             var pd = new PriceData { Category = category };
@@ -218,12 +212,7 @@ namespace BusinessRulesMigrator.OverrideOffer
 
         public void AddProduct(int? offerTypeId, int? offerSubTypeId, string propertyName, string value, int actionTypeId)
         {
-            if (OfferData.IsNull())
-            {
-                OfferData = new OfferDataBase();
-            }
-
-            OfferData.OverrideOfferProperty(propertyName, value, actionTypeId);
+            (OfferData ??= new OfferDataBase()).OverrideOfferProperty(propertyName, value, actionTypeId);
 
             if (offerTypeId.HasValue)
             {
@@ -237,14 +226,11 @@ namespace BusinessRulesMigrator.OverrideOffer
 
         private void AddProductByCategory(int category)
         {
-            if (Filter.IsNull())
+            Filter ??= new ByProducts
             {
-                Filter = new ByProducts
-                {
-                    Condition = "IfAny",
-                    Specs = new List<ProductSpec>()
-                };
-            }
+                Condition = "IfAny",
+                Specs = new List<ProductSpec>()
+            };
 
             Filter.Specs.Add(new ProductSpec
             {
@@ -261,14 +247,11 @@ namespace BusinessRulesMigrator.OverrideOffer
 
         private void AddProductByType(int type)
         {
-            if (Filter.IsNull())
+            Filter ??= new ByProducts
             {
-                Filter = new ByProducts
-                {
-                    Condition = "IfAny",
-                    Specs = new List<ProductSpec>()
-                };
-            }
+                Condition = "IfAny",
+                Specs = new List<ProductSpec>()
+            };
 
             var r = Offer.OfferTypes[type];
 
@@ -320,13 +303,11 @@ namespace BusinessRulesMigrator.OverrideOffer
         {
             if (!offerTypeId.HasValue && !offerSubTypeId.HasValue) return;
 
-            if (ByProducts.IsNull())
-            {
-                ByProducts = new List<OverrideOfferByProducts>();
-            }
+            ByProducts ??= new List<OverrideOfferByProducts>();
 
             var obp = new OverrideOfferByProducts();
             obp.AddProduct(offerTypeId, offerSubTypeId, propertyName, value, actionTypeId);
+            ByProducts.Add(obp);
         }
     }
     

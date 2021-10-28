@@ -13,6 +13,7 @@ using BusinessRulesMigrator.OrderingMethod;
 using BusinessRulesMigrator.OverrideOrderConfirmation;
 using BusinessRulesMigrator.OverrideOffer;
 using BusinessRulesMigrator.OverrideValidationGroup;
+using BusinessRulesMigrator.ConditionalOffers;
 
 using System.Threading.Tasks;
 
@@ -36,7 +37,7 @@ namespace BusinessRulesMigrator
                     var overrideOrderConfirmationRules = new OverrideOrderConfirmationConverter().Convert(rules);
                     var overrideOfferRules = new OverrideOfferConverter().Convert(rules);
                     var overrideValidationGroupRules = new OverrideValidationGroupConverter().Convert(rules);
-
+                    var conditionalOffersRules = new ConditionalOfferConverter().Convert(rules);
 
                     var newRules =
                         revenueRankingRules
@@ -44,6 +45,7 @@ namespace BusinessRulesMigrator
                         .Concat(overrideOrderConfirmationRules)
                         .Concat(overrideOfferRules)
                         .Concat(overrideValidationGroupRules)
+                        .Concat(conditionalOffersRules)
                         .ToArray();
 
                     if (newRules.Any())
@@ -58,7 +60,7 @@ namespace BusinessRulesMigrator
                 Console.WriteLine($"ERROR: {ex}");
             }
 
-            Console.WriteLine("Press any key to exit");
+            Console.WriteLine("Press enter to exit");
             Console.ReadLine();
         }
     }

@@ -42,6 +42,7 @@ namespace BusinessRulesMigrator.Common.Extensions
             public const string DepositPrice = "DepositPrice";
             public const string ShortTermPrice = "ShortTermPrice";
             public const string Prepopulate = "Prepopulate";
+            public const string ConditionalOffers = "ConditionalOffers";
         }
 
         static class Action
@@ -98,6 +99,12 @@ namespace BusinessRulesMigrator.Common.Extensions
                 r.Entity.SameAs(Entity.Bonus) ||
                 r.Entity.SameAs(Entity.Promotion)
             )
+            .ToArray();
+
+        public static OldBusinessRule[] ConditionalOfferRules(this IEnumerable<OldBusinessRule> rules) =>
+            rules
+            .Where(r => r.ProviderID.HasValue)
+            .Where(r => r.Entity.SameAs(Entity.Offer) && r.EntityAttribute.SameAs(EntityAttribute.ConditionalOffers))
             .ToArray();
 
         public static bool IsCustomizationPrepopulate(this OldBusinessRule r) =>
