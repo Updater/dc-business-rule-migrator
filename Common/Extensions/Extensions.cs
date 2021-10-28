@@ -49,11 +49,6 @@ namespace BusinessRulesMigrator.Common.Extensions
             public const string Customization = "Customization";
         }
 
-        static class Action
-        {
-            public const int Replace = 4;
-        }
-
         public static OldBusinessRule[] RevenueRankingRules(this IEnumerable<OldBusinessRule> rules) =>
             rules
             .Where(r => r.ProviderID.HasValue)
