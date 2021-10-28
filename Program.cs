@@ -13,6 +13,7 @@ using BusinessRulesMigrator.OrderingMethod;
 using BusinessRulesMigrator.OverrideOrderConfirmation;
 using BusinessRulesMigrator.OverrideOffer;
 using BusinessRulesMigrator.OverrideValidationGroup;
+using BusinessRulesMigrator.ConditionalOffers;
 using BusinessRulesMigrator.ConditionalProviderAvailability;
 using BusinessRulesMigrator.InjectCustomizations;
 using System.Threading.Tasks;
@@ -37,6 +38,7 @@ namespace BusinessRulesMigrator
                     var overrideOrderConfirmationRules = new OverrideOrderConfirmationConverter().Convert(rules);
                     var overrideOfferRules = new OverrideOfferConverter().Convert(rules);
                     var overrideValidationGroupRules = new OverrideValidationGroupConverter().Convert(rules);
+                    var conditionalOffersRules = new ConditionalOfferConverter().Convert(rules);
                     var conditionalProviderAvailabilityRules = new ConditionalProviderAvailabilityConverter().Convert(rules);
                     var injectCustomizationsRules = new InjectCustomizationsConverter().Convert(rules);
                     var injectDisclosureCustomizationsRules = new InjectDisclosureCustomizationsConverter().Convert(rules);
@@ -47,6 +49,7 @@ namespace BusinessRulesMigrator
                         .Concat(overrideOrderConfirmationRules)
                         .Concat(overrideOfferRules)
                         .Concat(overrideValidationGroupRules)
+                        .Concat(conditionalOffersRules)
                         .Concat(conditionalProviderAvailabilityRules)
                         .Concat(injectCustomizationsRules)
                         .Concat(injectDisclosureCustomizationsRules)
@@ -64,7 +67,7 @@ namespace BusinessRulesMigrator
                 Console.WriteLine($"ERROR: {ex}");
             }
 
-            Console.WriteLine("Press any key to exit");
+            Console.WriteLine("Press enter to exit");
             Console.ReadLine();
         }
     }

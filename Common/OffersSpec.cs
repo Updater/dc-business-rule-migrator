@@ -21,6 +21,9 @@ namespace BusinessRulesMigrator.Common
             (ByCode?.Codes).Safe().Any() ||
             (ByProducts?.Specs).Safe().Any();
 
+        public bool HasProviderConstraint(int providerId) =>
+            (ByProvider?.IDs).Safe().Any(pid => pid == providerId);
+      
         public void AddProviderId(int prvId)
         {
             ByProvider ??= new ByIDs
