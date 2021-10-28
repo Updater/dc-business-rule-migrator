@@ -4,6 +4,13 @@ using System.Text;
 
 namespace BusinessRulesMigrator.Common
 {
+    internal static class ActionType
+    {
+        public const int Add = 1;
+        public const int Replace = 4;
+        public const int Delete = 6;
+    }
+
     internal class OldBusinessRule
     {
         public int BusinessRuleID { get; set; }

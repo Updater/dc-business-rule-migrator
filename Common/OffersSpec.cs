@@ -21,18 +21,29 @@ namespace BusinessRulesMigrator.Common
             (ByCode?.Codes).Safe().Any() ||
             (ByProducts?.Specs).Safe().Any();
 
+        public void AddProviderId(int prvId)
+        {
+            ByProvider ??= new ByIDs
+            {
+                Condition = "IfAny",
+                IDs = new List<int>(),
+            };
+
+            if (!ByProvider.IDs.Any(id => id == prvId))
+            {
+                ByProvider.IDs.Add(prvId);
+            }
+        }
+
         public void AddOfferCode(string code)
         {
             if (code.IsBlank() || code.SameAs("NULL")) return;
 
-            if (ByCode.IsNull())
+            ByCode ??= new ByCode
             {
-                ByCode = new ByCode
-                {
-                    Condition = "IfAny",
-                    Codes = new List<string>()
-                };
-            }
+                Condition = "IfAny",
+                Codes = new List<string>(),
+            };
 
             if (!ByCode.Codes.Any(c => c.SameAs(code)))
             {
@@ -44,15 +55,12 @@ namespace BusinessRulesMigrator.Common
         {
             if (!category.HasValue || !Offer.OfferCategories.ContainsKey(category.Value)) return;
 
-            if (ByProducts.IsNull())
+            ByProducts ??= new ByProducts
             {
-                ByProducts = new ByProducts
-                {
-                    Condition = "IfAny",
-                    Specs = new List<ProductSpec>()
-                };
-            }
-
+                Condition = "IfAny",
+                Specs = new List<ProductSpec>(),
+            };
+            
             ByProducts.Specs.Add(new ProductSpec
             {
                 Condition = "HasExactly",
@@ -62,7 +70,7 @@ namespace BusinessRulesMigrator.Common
                     {
                         Category = Offer.OfferCategories[category.Value]
                     }
-                }
+                },
             });
         }
 
@@ -70,14 +78,11 @@ namespace BusinessRulesMigrator.Common
         {
             if (!type.HasValue || !Offer.OfferTypes.ContainsKey(type.Value)) return;
 
-            if (ByProducts.IsNull())
+            ByProducts ??= new ByProducts
             {
-                ByProducts = new ByProducts
-                {
-                    Condition = "IfAny",
-                    Specs = new List<ProductSpec>()
-                };
-            }
+                Condition = "IfAny",
+                Specs = new List<ProductSpec>(),
+            };
 
             var r = Offer.OfferTypes[type.Value];
             
@@ -91,7 +96,7 @@ namespace BusinessRulesMigrator.Common
                         Category = Offer.GetOfferCategoryForOfferType(r.Category),
                         Type = r.Type
                     }
-                }
+                },
             });
         }
     }
