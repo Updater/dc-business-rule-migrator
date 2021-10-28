@@ -140,6 +140,13 @@ namespace BusinessRulesMigrator.Common.Extensions
             .Where(r => r.EntityAttribute.SameAs(EntityAttribute.Customization))
             .ToArray();
 
+        public static OldBusinessRule[] RemoveProvidersRules(this IEnumerable<OldBusinessRule> rules) =>
+            rules
+            .Where(r => r.ActionTypeID == ActionType.Delete)
+            .Where(r => r.Entity.SameAs(Entity.Provider))
+            .Where(r => r.EntityAttribute.IsBlank())
+            .ToArray();
+
         public static string ToSqlValue(this int? value) => value.HasValue ? value.Value.ToString() : "NULL";
     }
 }

@@ -89,7 +89,6 @@ namespace BusinessRulesMigrator.OverrideOrderConfirmation
                         };
                         data.Add(item);
                     }
-
                     item.Criteria.AddOfferCode(offerCode);
                     item.Criteria.AddResultCode(resultCode);
                 }
