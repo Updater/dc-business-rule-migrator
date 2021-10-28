@@ -19,6 +19,7 @@ namespace BusinessRulesMigrator.Common
         OverrideValidationGroup = 9,
         OverrideOrderConfirmation = 10,
         InjectCustomizations = 11,
-        AddChannelLineupToOffers = 12,
+        InjectDisclosureCustomizations = 12,
+        AddChannelLineupToOffers = 13,
     }
 }

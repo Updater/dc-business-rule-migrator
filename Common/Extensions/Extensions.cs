@@ -18,6 +18,8 @@ namespace BusinessRulesMigrator.Common.Extensions
             public const string Promotion = "Promotion";
             public const string Customization = "Customization";
             public const string Choice = "Choice";
+            public const string Provider = "Provider";
+            public const string Disclosure = "Disclosure";
         }
 
         public static class EntityAttribute
@@ -43,6 +45,8 @@ namespace BusinessRulesMigrator.Common.Extensions
             public const string ShortTermPrice = "ShortTermPrice";
             public const string Prepopulate = "Prepopulate";
             public const string ConditionalOffers = "ConditionalOffers";
+            public const string ConditionalProviders = "ConditionalProviders";
+            public const string Customization = "Customization";
         }
 
         static class Action
@@ -111,14 +115,14 @@ namespace BusinessRulesMigrator.Common.Extensions
             r.Entity.SameAs(Entity.Customization) && r.EntityAttribute.SameAs(EntityAttribute.Prepopulate);
 
         public static bool IsOverrideCustomization(this OldBusinessRule r) =>
-            r.ActionTypeID == Action.Replace &&
+            r.ActionTypeID == ActionType.Replace &&
             r.Entity.SameAs(Entity.Customization) && 
             r.EntityAttribute.IsNotBlank() &&
             r.EntityAttribute.SameAs(r.CustomizationCode) &&
             r.ChoiceCode.IsBlank();
 
         public static bool IsOverrideChoice(this OldBusinessRule r) =>
-            r.ActionTypeID == Action.Replace &&
+            r.ActionTypeID == ActionType.Replace &&
             r.Entity.SameAs(Entity.Choice) &&
             r.EntityAttribute.IsNotBlank() &&
             r.EntityAttribute.SameAs(r.ChoiceCode) &&
@@ -128,6 +132,24 @@ namespace BusinessRulesMigrator.Common.Extensions
             rules
             .Where(r => r.ProviderID.HasValue)
             .Where(r => r.IsCustomizationPrepopulate() || r.IsOverrideCustomization() || r.IsOverrideChoice())
+            .ToArray();
+
+        public static OldBusinessRule[] ConditionalProvidersRules(this IEnumerable<OldBusinessRule> rules) =>
+            rules.Where(r => r.Entity.SameAs(Entity.Provider) && r.EntityAttribute.SameAs(EntityAttribute.ConditionalProviders))
+            .ToArray();
+
+        public static OldBusinessRule[] InjectCustomizationsRules(this IEnumerable<OldBusinessRule> rules) =>
+            rules
+            .Where(r => r.ActionTypeID == ActionType.Add)
+            .Where(r => r.Entity.SameAs(Entity.Customization))
+            .Where(r => r.EntityAttribute.IsBlank())
+            .ToArray();
+
+        public static OldBusinessRule[] InjectDisclosureCustomizationsRules(this IEnumerable<OldBusinessRule> rules) =>
+            rules
+            .Where(r => r.ActionTypeID == ActionType.Add || r.ActionTypeID == ActionType.Delete)
+            .Where(r => r.Entity.SameAs(Entity.Disclosure))
+            .Where(r => r.EntityAttribute.SameAs(EntityAttribute.Customization))
             .ToArray();
 
         public static string ToSqlValue(this int? value) => value.HasValue ? value.Value.ToString() : "NULL";

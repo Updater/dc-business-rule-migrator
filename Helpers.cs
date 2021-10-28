@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Linq;
 using BusinessRulesMigrator.Common;
 using BusinessRulesMigrator.Common.Extensions;
-
+using Bridgevine;
 using Bridgevine.Json;
 
 namespace BusinessRulesMigrator
@@ -42,7 +42,7 @@ namespace BusinessRulesMigrator
                 $"{driver.DisplayCategoryId.ToSqlValue()}," +
                 "NULL," +
                 "NULL," +
-                $"'{BvJson.Serialize(data).Replace("'", "''")}'" +
+                (data.IsNull() ? "NULL" : $"'{BvJson.Serialize(data).Replace("'", "''")}'") +
             ")";
     }
 }
