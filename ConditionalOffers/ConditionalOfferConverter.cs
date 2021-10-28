@@ -42,7 +42,7 @@ namespace BusinessRulesMigrator.ConditionalOffers
 
                     var availability = data.FirstOrDefault(a =>
                         a.ConditionalOffers.Safe()
-                        .Any(o => o.HasProviderConstraint(rule.ProviderID.Value.ToString())));
+                        .Any(o => o.HasProviderConstraint(rule.ProviderID.Value)));
 
                     if (availability.IsNull())
                     {
@@ -55,9 +55,9 @@ namespace BusinessRulesMigrator.ConditionalOffers
                                     ByProvider = new ByIDs
                                     {
                                         Condition = "IfAll",
-                                        IDs = new List<string>
+                                        IDs = new List<int>
                                         {
-                                            rule.ProviderID.Value.ToString()
+                                            rule.ProviderID.Value
                                         }
                                     },
                                     ByCode = new ByCode
@@ -76,7 +76,7 @@ namespace BusinessRulesMigrator.ConditionalOffers
                     else
                     {
                         //should never not find a result, and the result should always have at least one code.
-                        var spec = availability.ConditionalOffers.First(o => o.HasProviderConstraint(rule.ProviderID.Value.ToString()));
+                        var spec = availability.ConditionalOffers.First(o => o.HasProviderConstraint(rule.ProviderID.Value));
                         spec.AddOfferCode(rule.OfferCode);
                     }
                 }
