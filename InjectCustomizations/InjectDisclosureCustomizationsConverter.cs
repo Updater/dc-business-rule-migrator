@@ -72,7 +72,7 @@ namespace BusinessRulesMigrator.InjectCustomizations
 
             foreach (var (driver, data) in dataByDriver)
             {
-                converted.Add(GenerateRuleSql(RuleType.InjectDisclosureCustomizations, Operation.GetOrderRequirements, driver, data.Any() ? data : null));
+                converted.Add(GenerateRuleSql(RuleType.InjectDisclosureCustomizations, Operation.GetOrderRequirements, driver, data));
             }
 
             return converted;

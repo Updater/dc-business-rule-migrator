@@ -43,12 +43,6 @@ namespace BusinessRulesMigrator.ConditionalProviderAvailability
 
                 foreach (var rule in group.ToList())
                 {
-                    if (rule.value.IsBlank())
-                    {
-                        Console.WriteLine($"ERROR: The value column is not defined. BusinessRuleID {rule.BusinessRuleID}.");
-                        continue;
-                    }
-
                     var items =
                         rule.value.GetList(true, @"[$]")
                         .Select(elem =>
@@ -73,8 +67,7 @@ namespace BusinessRulesMigrator.ConditionalProviderAvailability
 
             foreach (var (driver, data) in dataByDriver)
             {
-                if (data.Any())
-                    converted.Add(GenerateRuleSql(RuleType.ConditionalProviderAvailability, Operation.GetOfferAvailability, driver, data));
+                converted.Add(GenerateRuleSql(RuleType.ConditionalProviderAvailability, Operation.GetOfferAvailability, driver, data));
             }
 
             return converted;

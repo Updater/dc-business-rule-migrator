@@ -7,7 +7,6 @@ using System.Globalization;
 using System.Linq;
 using CsvHelper;
 using BusinessRulesMigrator.Common.CsvHelper;
-using BusinessRulesMigrator.Common.Extensions;
 using BusinessRulesMigrator.RevenueRanking;
 using BusinessRulesMigrator.OrderingMethod;
 using BusinessRulesMigrator.OverrideOrderConfirmation;
@@ -16,7 +15,7 @@ using BusinessRulesMigrator.OverrideValidationGroup;
 using BusinessRulesMigrator.ConditionalOffers;
 using BusinessRulesMigrator.ConditionalProviderAvailability;
 using BusinessRulesMigrator.InjectCustomizations;
-using System.Threading.Tasks;
+using BusinessRulesMigrator.RemoveProviders;
 
 namespace BusinessRulesMigrator
 {
@@ -42,6 +41,7 @@ namespace BusinessRulesMigrator
                     var conditionalProviderAvailabilityRules = new ConditionalProviderAvailabilityConverter().Convert(rules);
                     var injectCustomizationsRules = new InjectCustomizationsConverter().Convert(rules);
                     var injectDisclosureCustomizationsRules = new InjectDisclosureCustomizationsConverter().Convert(rules);
+                    var removeProvidersRules = new RemoveProvidersConverter().Convert(rules);
 
                     var newRules =
                         revenueRankingRules
@@ -53,6 +53,7 @@ namespace BusinessRulesMigrator
                         .Concat(conditionalProviderAvailabilityRules)
                         .Concat(injectCustomizationsRules)
                         .Concat(injectDisclosureCustomizationsRules)
+                        .Concat(removeProvidersRules)
                         .ToArray();
 
                     if (newRules.Any())

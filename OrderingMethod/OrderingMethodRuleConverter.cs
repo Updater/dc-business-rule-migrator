@@ -35,6 +35,8 @@ namespace BusinessRulesMigrator.OrderingMethod
 
                 foreach (var rule in group.ToList())
                 {
+                    if (rule.value.IsBlank()) continue;
+
                     var values = rule.value.GetList(false, @"[~]");
 
                     if (!values.Any())
@@ -61,7 +63,6 @@ namespace BusinessRulesMigrator.OrderingMethod
                         };
                         data.Add(item);
                     }
-
                     item.Offers.AddOfferCode(rule.OfferCode);
                     item.Offers.AddProductByCategory(rule.OfferTypeID);
                     item.Offers.AddProductByType(rule.OfferSubTypeID);
@@ -70,8 +71,7 @@ namespace BusinessRulesMigrator.OrderingMethod
 
             foreach (var (driver, data) in dataByDriver)
             {
-                if (data.Any())
-                    converted.Add(GenerateRuleSql(RuleType.OverrideOfferOrderingMethod, Operation.GetOfferAvailability, driver, data));
+                converted.Add(GenerateRuleSql(RuleType.OverrideOfferOrderingMethod, Operation.GetOfferAvailability, driver, data));
             }
 
             return converted;

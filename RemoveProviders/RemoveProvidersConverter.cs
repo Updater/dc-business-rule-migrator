@@ -9,21 +9,21 @@ using BusinessRulesMigrator.Common.Extensions;
 using Bridgevine;
 using static BusinessRulesMigrator.Helpers;
 
-namespace BusinessRulesMigrator.InjectCustomizations
+namespace BusinessRulesMigrator.RemoveProviders
 {
-    internal class InjectCustomizationsConverter
+    internal class RemoveProvidersConverter
     {
         public List<string> Convert(IEnumerable<OldBusinessRule> rules)
         {
             var converted = new List<string>();
 
-            var groups = rules.InjectCustomizationsRules().GroupBy(r => r.GetDriverKey());
+            var groups = rules.RemoveProvidersRules().GroupBy(r => r.GetDriverKey());
 
             if (!groups.Any()) return converted;
 
-            var dataByDriver = new Dictionary<DriverKey, List<Item>>();
+            var dataByDriver = new Dictionary<DriverKey, List<int>>();
 
-            int[] GetIDs(string input) =>
+            IEnumerable<int> GetIDs(string input) =>
                 input.GetList(true)
                 .Select(i => (ok: int.TryParse(i, out int id), id: id))
                 .Where(i => i.ok)
@@ -38,33 +38,21 @@ namespace BusinessRulesMigrator.InjectCustomizations
 
                 if (!dataByDriver.TryGetValue(driver, out var data))
                 {
-                    data = new List<Item>();
+                    data = new List<int>();
                     dataByDriver[driver] = data;
                 }
 
                 foreach (var rule in group.ToList())
                 {
-                    var ids = GetIDs(rule.value);
+                    var ids = GetIDs(rule.value).Except(data);
 
-                    if (!ids.Any()) continue;
-
-                    var item = data.FirstOrDefault(i => i.ProviderId == rule.ProviderID);
-                    if (item.IsNull())
-                    {
-                        item = new Item
-                        {
-                            ProviderId = rule.ProviderID,
-                        };
-                        data.Add(item);
-                    }
-                    item.HandleCustomizations(true, ids);
-                    item.AddOfferConstraint(rule.OfferCode);
+                    data.AddRange(ids);
                 }
             }
 
             foreach (var (driver, data) in dataByDriver)
             {
-                converted.Add(GenerateRuleSql(RuleType.InjectCustomizations, Operation.GetOrderRequirements, driver, data));
+                converted.Add(GenerateRuleSql(RuleType.RemoveProviders, Operation.GetOfferAvailability, driver, data));
             }
 
             return converted;
