@@ -35,14 +35,23 @@ namespace BusinessRulesMigrator.ConditionalOffers
 
                 foreach (var rule in group.ToList())
                 {
-                    if (!rule.ProviderID.HasValue || rule.OfferCode.IsBlank() || rule.OfferCode.SameAs("NULL"))
+                    if (!rule.ProviderID.HasValue || rule.OfferCode.IsBlank() || rule.OfferCode.SameAs("NULL") || rule.value.IsBlank())
                     {
                         continue;
                     }
 
+                    var parts = rule.value.GetList(true, @"[$]");
+
+                    if (parts.Count != 2) continue;
+
+                    var providerOffers = parts[0].GetList(true, @"[~]");
+
+                    if (!providerOffers.Any()) continue;
+
+                    
                     var availability = data.FirstOrDefault(a =>
-                        a.ConditionalOffers.Safe()
-                        .Any(o => o.HasProviderConstraint(rule.ProviderID.Value)));
+                    a.ConditionalOffers.Safe()
+                    .Any(o => o.HasProviderConstraint(rule.ProviderID.Value)));
 
                     if (availability.IsNull())
                     {
@@ -79,6 +88,46 @@ namespace BusinessRulesMigrator.ConditionalOffers
                         var spec = availability.ConditionalOffers.First(o => o.HasProviderConstraint(rule.ProviderID.Value));
                         spec.AddOfferCode(rule.OfferCode);
                     }
+
+                    bool display = parts[1].SameAs("show");
+
+                    foreach (var pOffer in providerOffers)
+                    {
+                        var offerParts = pOffer.GetList(true, $"[,]");
+                        if (offerParts.Count != 2 || !int.TryParse(offerParts[0], out var pid))
+                        {
+                            continue;
+                        }
+
+                        availability.Requirement ??= new Requirement 
+                        { 
+                            Visibility = new Visibility 
+                            { 
+                                ConditionalOffersMustExist = true, 
+                                Show = display 
+                            },
+                            Condition = new RequirementCondition
+                            {
+                                LogicalOperator = "Or",
+                                Left = new OfferAvailabilitySpec
+                                {
+                                    Condition = "IfAny",
+                                    Specs = new List<OffersSpec>()
+                                }
+                            }
+                        };
+
+                        var spec = availability.Requirement.Condition.Left.Specs.FirstOrDefault(os => os.HasProviderConstraint(pid));
+                        if (spec.IsNull())
+                        {
+                            spec = new OffersSpec();
+                            availability.Requirement.Condition.Left.Specs.Add(spec);
+                            spec.AddProviderId(pid);                            
+                        }
+
+                        spec.AddOfferCode(offerParts[1]);
+                    }
+
                 }
             }
 
